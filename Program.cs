@@ -1,8 +1,58 @@
+using Calibr8Fit.Api.Data;
+using Calibr8Fit.Api.Extensions;
+using Calibr8Fit.Api.Interfaces.Repository;
+using Calibr8Fit.Api.Interfaces.Service;
+using Calibr8Fit.Api.Models;
+using Calibr8Fit.Api.Repository;
+using Calibr8Fit.Api.Services;
+using Calibr8Fit.Api.Validators;
+using DotNetEnv;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+
+// Load environment variables from .env file
+Env.Load();
+
+// Configure DbContext with PostgreSQL connection
+builder.Services.AddDbContext<ApplicationDbContext>(options => options
+    .UseSnakeCaseNamingConvention()
+    .UseLazyLoadingProxies()
+    .UseNpgsql(Environment.GetEnvironmentVariable("DefaultConnection")));
+
+// Custom validator
+builder.Services.AddScoped<IUserValidator<User>>(provider =>
+    new UserNameLengthValidator<User>(5, 32));
+
+// Identity
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = false;
+
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyz0123456789";
+})
+.AddDefaultTokenProviders()
+.AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
+builder.Services.AddOpenApi("v1", options =>
+{
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+});
 
 var app = builder.Build();
 
@@ -10,36 +60,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseSwaggerUi(options =>
-    {
-        options.DocumentPath = "/openapi/v1.json";
-    });
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.MapControllers();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
