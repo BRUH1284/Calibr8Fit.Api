@@ -26,9 +26,6 @@ namespace Calibr8Fit.Api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync([FromBody] RegisterDto registerDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             // Return user creation result
             var result = await _authService.RegisterUserAsync(registerDto);
             return result.Succeeded
@@ -38,9 +35,6 @@ namespace Calibr8Fit.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             // Return login result
             var result = await _authService.LoginUserAsync(loginDto);
             return result.Succeeded
@@ -48,12 +42,8 @@ namespace Calibr8Fit.Api.Controllers
                 : Unauthorized(result.Errors);
         }
         [HttpPost("refresh-token")]
-        [Authorize]
         public async Task<IActionResult> RefreshToken([FromBody] TokenRequestDto refreshTokenDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             // Return refresh token result
             var result = await _authService.RefreshTokenAsync(refreshTokenDto);
             return result.Succeeded

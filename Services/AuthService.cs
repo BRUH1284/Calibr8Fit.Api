@@ -15,16 +15,19 @@ namespace Calibr8Fit.Api.Services
         private readonly SignInManager<User> _signInManager;
         private readonly ITokenService _tokenService;
         private readonly IRefreshTokenRepository _refreshTokenRepo;
+        private readonly IUserProfileRepository _userProfileRepo;
         public AuthService(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             ITokenService tokenService,
-            IRefreshTokenRepository refreshTokenRepo)
+            IRefreshTokenRepository refreshTokenRepo,
+            IUserProfileRepository userProfileRepo)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
             _refreshTokenRepo = refreshTokenRepo;
+            _userProfileRepo = userProfileRepo;
         }
         public async Task<IdentityResult<TokenDto>> RegisterUserAsync(RegisterDto registerDto)
         {
@@ -37,6 +40,15 @@ namespace Calibr8Fit.Api.Services
             var createdUser = await _userManager.CreateAsync(user, registerDto.Password);
             if (!createdUser.Succeeded)
                 return IdentityResult<TokenDto>.Failure(createdUser.Errors);
+
+            // Create user profile
+            var userProfile = new UserProfile
+            {
+                UserId = user.Id
+            };
+
+            // Save user profile
+            await _userProfileRepo.CreateAsync(userProfile);
 
             // Add role
             var roleResult = await _userManager.AddToRoleAsync(user, "User");
@@ -73,7 +85,7 @@ namespace Calibr8Fit.Api.Services
             var principal = _tokenService.GetPrincipalFromToken(tokenRequestDto.OldAccessToken);
             var userName = principal?.Identity?.Name;
             if (userName == null)
-                return Result<TokenDto>.Failure(["Invalid token or username."]);
+                return Result<TokenDto>.Failure(["Invalid token."]);
 
             // Find user in DB
             var user = await _userManager.Users.FirstOrDefaultAsync(x => x.UserName == userName);
