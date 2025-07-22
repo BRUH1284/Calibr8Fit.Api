@@ -36,10 +36,33 @@ namespace Calibr8Fit.Api.Services
             {
                 UserName = registerDto.UserName
             };
+            
+            // Check if user already exists
+            var existingUser = await _userManager.FindByNameAsync(registerDto.UserName);
+            if (existingUser != null)
+                return IdentityResult<TokenDto>.Failure([
+                    new IdentityError {
+                        Code = "DuplicateUserName",
+                        Description = "User with this username already exists."
+                    }
+                ]);
+
             // Save new user
-            var createdUser = await _userManager.CreateAsync(user, registerDto.Password);
-            if (!createdUser.Succeeded)
-                return IdentityResult<TokenDto>.Failure(createdUser.Errors);
+            try
+            {
+                var createdUser = await _userManager.CreateAsync(user, registerDto.Password);
+                if (!createdUser.Succeeded)
+                    return IdentityResult<TokenDto>.Failure(createdUser.Errors);
+            }
+            catch (Exception ex)
+            {
+                var identityError = new IdentityError
+                {
+                    Code = "Exception",
+                    Description = ex.InnerException?.Message ?? ex.Message
+                };
+                return IdentityResult<TokenDto>.Failure([identityError]);
+            }
 
             // Create user profile
             var userProfile = new UserProfile
