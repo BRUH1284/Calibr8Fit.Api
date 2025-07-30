@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Calibr8Fit.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250708095559_RefreshTokens")]
-    partial class RefreshTokens
+    [Migration("20250725131049_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -139,15 +139,43 @@ namespace Calibr8Fit.Api.Migrations
                         .HasColumnType("text")
                         .HasColumnName("user_id");
 
+                    b.Property<int>("ActivityLevel")
+                        .HasColumnType("integer")
+                        .HasColumnName("activity_level");
+
+                    b.Property<int>("Climate")
+                        .HasColumnType("integer")
+                        .HasColumnName("climate");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_of_birth");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("first_name");
 
+                    b.Property<int>("Gender")
+                        .HasColumnType("integer")
+                        .HasColumnName("gender");
+
+                    b.Property<float>("Height")
+                        .HasColumnType("real")
+                        .HasColumnName("height");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("last_name");
+
+                    b.Property<float>("TargetWeight")
+                        .HasColumnType("real")
+                        .HasColumnName("target_weight");
+
+                    b.Property<float>("Weight")
+                        .HasColumnType("real")
+                        .HasColumnName("weight");
 
                     b.HasKey("UserId")
                         .HasName("pk_user_profiles");

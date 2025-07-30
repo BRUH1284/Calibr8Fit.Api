@@ -5,7 +5,7 @@ namespace Calibr8Fit.Api.Interfaces.Repository
 {
     public interface IUserProfileRepository
     {
-        Task<UserProfile> CreateAsync(UserProfile userProfile);
+        Task<UserProfile> AddAsync(UserProfile userProfile);
         Task<UserProfile?> UpdateAsync(string id, UserProfileSettingsDto request);
     }
 }

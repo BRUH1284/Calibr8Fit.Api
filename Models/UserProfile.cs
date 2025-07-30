@@ -13,7 +13,6 @@ namespace Calibr8Fit.Api.Models
         public float TargetWeight { get; set; } = 0.0f;
         public float Height { get; set; } = 0.0f;
         public UserActivityLevel ActivityLevel { get; set; } = UserActivityLevel.Sedentary;
-        public UserGoal Goal { get; set; } = UserGoal.MaintainWeight;
         public UserClimate Climate { get; set; } = UserClimate.Temperate;
     }
 }

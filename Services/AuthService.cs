@@ -9,26 +9,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Calibr8Fit.Api.Services
 {
-    public class AuthService : IAuthService
+    public class AuthService(
+        UserManager<User> userManager,
+        SignInManager<User> signInManager,
+        ITokenService tokenService,
+        IRefreshTokenRepository refreshTokenRepo,
+        IUserProfileRepository userProfileRepo) : IAuthService
     {
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
-        private readonly ITokenService _tokenService;
-        private readonly IRefreshTokenRepository _refreshTokenRepo;
-        private readonly IUserProfileRepository _userProfileRepo;
-        public AuthService(
-            UserManager<User> userManager,
-            SignInManager<User> signInManager,
-            ITokenService tokenService,
-            IRefreshTokenRepository refreshTokenRepo,
-            IUserProfileRepository userProfileRepo)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _tokenService = tokenService;
-            _refreshTokenRepo = refreshTokenRepo;
-            _userProfileRepo = userProfileRepo;
-        }
+        private readonly UserManager<User> _userManager = userManager;
+        private readonly SignInManager<User> _signInManager = signInManager;
+        private readonly ITokenService _tokenService = tokenService;
+        private readonly IRefreshTokenRepository _refreshTokenRepo = refreshTokenRepo;
+        private readonly IUserProfileRepository _userProfileRepo = userProfileRepo;
+
         public async Task<IdentityResult<TokenDto>> RegisterUserAsync(RegisterDto registerDto)
         {
             // Crete new user
@@ -36,7 +29,7 @@ namespace Calibr8Fit.Api.Services
             {
                 UserName = registerDto.UserName
             };
-            
+
             // Check if user already exists
             var existingUser = await _userManager.FindByNameAsync(registerDto.UserName);
             if (existingUser != null)
@@ -71,7 +64,7 @@ namespace Calibr8Fit.Api.Services
             };
 
             // Save user profile
-            await _userProfileRepo.CreateAsync(userProfile);
+            await _userProfileRepo.AddAsync(userProfile);
 
             // Add role
             var roleResult = await _userManager.AddToRoleAsync(user, "User");
@@ -89,7 +82,7 @@ namespace Calibr8Fit.Api.Services
 
             // Check username
             var user = await _userManager.Users.FirstOrDefaultAsync(x => x.UserName == loginDto.UserName);
-            if (user == null || !(await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false)).Succeeded)
+            if (user is null || !(await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false)).Succeeded)
                 return Result<TokenDto>.Failure([unauthorizedMessage]);
 
             // Check password
@@ -107,17 +100,17 @@ namespace Calibr8Fit.Api.Services
             // Get user from token
             var principal = _tokenService.GetPrincipalFromToken(tokenRequestDto.OldAccessToken);
             var userName = principal?.Identity?.Name;
-            if (userName == null)
+            if (userName is null)
                 return Result<TokenDto>.Failure(["Invalid token."]);
 
             // Find user in DB
             var user = await _userManager.Users.FirstOrDefaultAsync(x => x.UserName == userName);
-            if (user == null)
+            if (user is null)
                 return Result<TokenDto>.Failure(["User not found."]);
 
             // Validate token
             var storedToken = await _refreshTokenRepo.GetByUserIdAndDeviceIdAsync(user.Id, tokenRequestDto.DeviceId);
-            if (storedToken == null || !_tokenService.VerifyRefreshToken(tokenRequestDto.RefreshToken, storedToken.TokenHash))
+            if (storedToken is null || !_tokenService.VerifyRefreshToken(tokenRequestDto.RefreshToken, storedToken.TokenHash))
                 return Result<TokenDto>.Failure(["Invalid refresh token."]);
 
             // Retrieve user roles

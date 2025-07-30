@@ -5,9 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Calibr8Fit.Api.Repository
 {
-    public class RefreshTokenRepository : RepositoryBase, IRefreshTokenRepository
+    public class RefreshTokenRepository(ApplicationDbContext context) : RepositoryBase(context), IRefreshTokenRepository
     {
-        public RefreshTokenRepository(ApplicationDbContext context) : base(context) { }
         // Get by UserId
         public async Task<List<RefreshToken>> GetByUserIdAsync(string userId)
         {
@@ -23,10 +22,7 @@ namespace Calibr8Fit.Api.Repository
         {
             var refreshTokenModel = await _context.RefreshTokens.FindAsync(userId, deviceId);
 
-            if (refreshTokenModel == null)
-            {
-                return null;
-            }
+            if (refreshTokenModel is null) return null;
 
             _context.RefreshTokens.Remove(refreshTokenModel);
             await _context.SaveChangesAsync();

@@ -6,14 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Calibr8Fit.Api.Services
 {
-    public class CurrentUserService : ICurrentUserService
+    public class CurrentUserService(UserManager<User> userManager) : ICurrentUserService
     {
-        private readonly UserManager<User> _userManager;
-
-        public CurrentUserService(UserManager<User> userManager)
-        {
-            _userManager = userManager;
-        }
+        private readonly UserManager<User> _userManager = userManager;
 
         public async Task<User?> GetCurrentUserAsync(ClaimsPrincipal user)
         {

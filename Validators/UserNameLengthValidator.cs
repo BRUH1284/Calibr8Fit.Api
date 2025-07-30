@@ -2,16 +2,13 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Calibr8Fit.Api.Validators
 {
-    public class UserNameLengthValidator<TUser> : IUserValidator<TUser> where TUser : IdentityUser
+    public class UserNameLengthValidator<TUser>(
+        int minLength = 5,
+        int maxLength = 32) : IUserValidator<TUser> where TUser : IdentityUser
     {
-        private readonly int _minLength;
-        private readonly int _maxLength;
+        private readonly int _minLength = minLength;
+        private readonly int _maxLength = maxLength;
 
-        public UserNameLengthValidator(int minLength = 5, int maxLength = 32)
-        {
-            _minLength = minLength;
-            _maxLength = maxLength;
-        }
         public Task<IdentityResult> ValidateAsync(UserManager<TUser> manager, TUser user)
         {
             // Validate the username length

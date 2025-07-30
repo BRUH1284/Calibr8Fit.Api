@@ -160,12 +160,39 @@ namespace Calibr8Fit.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "refresh_tokens",
+                columns: table => new
+                {
+                    user_id = table.Column<string>(type: "text", nullable: false),
+                    device_id = table.Column<string>(type: "text", nullable: false),
+                    token_hash = table.Column<string>(type: "text", nullable: false),
+                    expires_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_refresh_tokens", x => new { x.user_id, x.device_id });
+                    table.ForeignKey(
+                        name: "fk_refresh_tokens_asp_net_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "user_profiles",
                 columns: table => new
                 {
                     user_id = table.Column<string>(type: "text", nullable: false),
                     first_name = table.Column<string>(type: "text", nullable: false),
-                    last_name = table.Column<string>(type: "text", nullable: false)
+                    last_name = table.Column<string>(type: "text", nullable: false),
+                    date_of_birth = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    gender = table.Column<int>(type: "integer", nullable: false),
+                    weight = table.Column<float>(type: "real", nullable: false),
+                    target_weight = table.Column<float>(type: "real", nullable: false),
+                    height = table.Column<float>(type: "real", nullable: false),
+                    activity_level = table.Column<int>(type: "integer", nullable: false),
+                    climate = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -242,6 +269,9 @@ namespace Calibr8Fit.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "refresh_tokens");
 
             migrationBuilder.DropTable(
                 name: "user_profiles");

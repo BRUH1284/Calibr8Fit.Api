@@ -4,14 +4,9 @@ using Microsoft.OpenApi.Models;
 
 namespace Calibr8Fit.Api.Extensions
 {
-    public sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransformer
+    public sealed class BearerSecuritySchemeTransformer(IAuthenticationSchemeProvider authenticationSchemeProvider) : IOpenApiDocumentTransformer
     {
-        private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;
-
-        public BearerSecuritySchemeTransformer(IAuthenticationSchemeProvider authenticationSchemeProvider)
-        {
-            _authenticationSchemeProvider = authenticationSchemeProvider;
-        }
+        private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider = authenticationSchemeProvider;
 
         public async Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
         {

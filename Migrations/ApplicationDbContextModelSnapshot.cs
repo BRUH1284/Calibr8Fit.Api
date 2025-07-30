@@ -25,6 +25,51 @@ namespace Calibr8Fit.Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Calibr8Fit.Api.Models.Activity", b =>
+                {
+                    b.Property<int>("Code")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("code");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Code"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("MajorHeading")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("major_heading");
+
+                    b.Property<float>("MetValue")
+                        .HasColumnType("real")
+                        .HasColumnName("met_value");
+
+                    b.HasKey("Code")
+                        .HasName("pk_activities");
+
+                    b.ToTable("activities", (string)null);
+                });
+
+            modelBuilder.Entity("Calibr8Fit.Api.Models.DataVersion", b =>
+                {
+                    b.Property<int>("DataResource")
+                        .HasColumnType("integer")
+                        .HasColumnName("data_resource");
+
+                    b.Property<DateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_updated_at");
+
+                    b.HasKey("DataResource")
+                        .HasName("pk_data_versions");
+
+                    b.ToTable("data_versions", (string)null);
+                });
+
             modelBuilder.Entity("Calibr8Fit.Api.Models.RefreshToken", b =>
                 {
                     b.Property<string>("UserId")
@@ -130,6 +175,42 @@ namespace Calibr8Fit.Api.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Calibr8Fit.Api.Models.UserActivity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("uuid_generate_v4()");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("MajorHeading")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("major_heading");
+
+                    b.Property<float>("MetValue")
+                        .HasColumnType("real")
+                        .HasColumnName("met_value");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_activities");
+
+                    b.HasIndex("UserId", "Id")
+                        .HasDatabaseName("ix_user_activities_user_id_id");
+
+                    b.ToTable("user_activities", (string)null);
+                });
+
             modelBuilder.Entity("Calibr8Fit.Api.Models.UserProfile", b =>
                 {
                     b.Property<string>("UserId")
@@ -156,10 +237,6 @@ namespace Calibr8Fit.Api.Migrations
                     b.Property<int>("Gender")
                         .HasColumnType("integer")
                         .HasColumnName("gender");
-
-                    b.Property<int>("Goal")
-                        .HasColumnType("integer")
-                        .HasColumnName("goal");
 
                     b.Property<float>("Height")
                         .HasColumnType("real")
@@ -372,6 +449,18 @@ namespace Calibr8Fit.Api.Migrations
                         .HasConstraintName("fk_refresh_tokens_asp_net_users_user_id");
                 });
 
+            modelBuilder.Entity("Calibr8Fit.Api.Models.UserActivity", b =>
+                {
+                    b.HasOne("Calibr8Fit.Api.Models.User", "User")
+                        .WithMany("UserActivities")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_activities_users_user_id");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Calibr8Fit.Api.Models.UserProfile", b =>
                 {
                     b.HasOne("Calibr8Fit.Api.Models.User", null)
@@ -442,6 +531,8 @@ namespace Calibr8Fit.Api.Migrations
             modelBuilder.Entity("Calibr8Fit.Api.Models.User", b =>
                 {
                     b.Navigation("Profile");
+
+                    b.Navigation("UserActivities");
                 });
 #pragma warning restore 612, 618
         }

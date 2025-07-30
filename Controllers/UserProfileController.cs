@@ -9,26 +9,25 @@ namespace Calibr8Fit.Api.Controllers
 {
     [ApiController]
     [Route("api/user-profile")]
-    public class UserProfileController : ControllerBase
+    public class UserProfileController(
+        ICurrentUserService currentUserService,
+        IUserProfileRepository userProfileRepository
+        ) : ControllerBase
     {
-        private readonly ICurrentUserService _currentUserService;
-        private readonly IUserProfileRepository _userProfileRepository;
-        public UserProfileController(
-            ICurrentUserService currentUserService,
-            IUserProfileRepository userProfileRepository)
-        {
-            _currentUserService = currentUserService;
-            _userProfileRepository = userProfileRepository;
-        }
+        private readonly ICurrentUserService _currentUserService = currentUserService;
+        private readonly IUserProfileRepository _userProfileRepository = userProfileRepository;
+
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetMyProfileAsync()
         {
             // Find user in DB
             var user = await _currentUserService.GetCurrentUserAsync(User);
-            if (user?.Profile == null) return Unauthorized("User profile not found.");
 
-            return Ok(user.ToUserProfileDto());
+            // If user or profile is null, return Unauthorized
+            return user?.Profile is null
+                ? Unauthorized("User profile not found.")
+                : Ok(user.ToUserProfileDto());
         }
         [HttpGet("settings")]
         [Authorize]
@@ -36,9 +35,11 @@ namespace Calibr8Fit.Api.Controllers
         {
             // Find user in DB
             var user = await _currentUserService.GetCurrentUserAsync(User);
-            if (user?.Profile == null) return Unauthorized("User profile not found.");
 
-            return Ok(user.ToUserProfileSettingsDto());
+            // If user or profile is null, return Unauthorized
+            return user?.Profile is null
+                ? Unauthorized("User profile not found.")
+                : Ok(user.ToUserProfileSettingsDto());
         }
         [HttpPut("settings")]
         [Authorize]
@@ -46,7 +47,7 @@ namespace Calibr8Fit.Api.Controllers
         {
             // Find user in DB
             var user = await _currentUserService.GetCurrentUserAsync(User);
-            if (user?.Profile == null) return Unauthorized("User profile not found.");
+            if (user?.Profile is null) return Unauthorized("User profile not found.");
 
             // Update user profile settings
             await _userProfileRepository.UpdateAsync(user.Id, request);

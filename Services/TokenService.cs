@@ -8,14 +8,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Calibr8Fit.Api.Services
 {
-    public class TokenService : ITokenService
+    public class TokenService(TokenValidationParameters tokenValidationParameters) : ITokenService
     {
-        private readonly TokenValidationParameters _tokenValidationParameters;
+        private readonly TokenValidationParameters _tokenValidationParameters = tokenValidationParameters;
 
-        public TokenService(TokenValidationParameters tokenValidationParameters)
-        {
-            _tokenValidationParameters = tokenValidationParameters;
-        }
         public string GenerateAccessToken(User user, IList<string> roles, DateTime expiresOn)
         {
             // Add user-specific claims
@@ -79,11 +75,10 @@ namespace Calibr8Fit.Api.Services
         {
             return tokenHash == ComputeSha256Hash(refreshToken);
         }
-        internal string ComputeSha256Hash(string rawToken)
+        internal static string ComputeSha256Hash(string rawToken)
         {
-            using var sha256 = SHA256.Create();
             var bytes = Encoding.UTF8.GetBytes(rawToken);
-            var hash = sha256.ComputeHash(bytes);
+            var hash = SHA256.HashData(bytes);
             return Convert.ToBase64String(hash);
         }
         public ClaimsPrincipal? GetPrincipalFromToken(string accessToken)
@@ -102,7 +97,7 @@ namespace Calibr8Fit.Api.Services
                 var jwtSecurityToken = securityToken as JwtSecurityToken;
 
                 // Ensure the token is a valid JWT and uses the HmacSha512 signing algorithm
-                if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha512, StringComparison.InvariantCultureIgnoreCase))
+                if (jwtSecurityToken is null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha512, StringComparison.InvariantCultureIgnoreCase))
                     return null;
 
                 return principal;

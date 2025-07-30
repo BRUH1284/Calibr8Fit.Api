@@ -5,11 +5,9 @@ using Calibr8Fit.Api.Models;
 
 namespace Calibr8Fit.Api.Repository
 {
-    public class UserProfileRepository : RepositoryBase, IUserProfileRepository
+    public class UserProfileRepository(ApplicationDbContext context) : RepositoryBase(context), IUserProfileRepository
     {
-        public UserProfileRepository(ApplicationDbContext context) : base(context) { }
-
-        public async Task<UserProfile> CreateAsync(UserProfile userProfile)
+        public async Task<UserProfile> AddAsync(UserProfile userProfile)
         {
             // Add new user profile to DB
             await _context.UserProfiles.AddAsync(userProfile);
@@ -21,8 +19,7 @@ namespace Calibr8Fit.Api.Repository
             // Get user profile by id
             var existingProfile = await _context.UserProfiles.FindAsync(id);
             // Profile dont exist
-            if (existingProfile == null)
-                return null;
+            if (existingProfile is null) return null;
 
             Console.WriteLine($"Updating profile for user ID: {id}");
             Console.WriteLine(request.UserName);
@@ -35,7 +32,6 @@ namespace Calibr8Fit.Api.Repository
             existingProfile.TargetWeight = request.TargetWeight ?? existingProfile.TargetWeight;
             existingProfile.Height = request.Height ?? existingProfile.Height;
             existingProfile.ActivityLevel = request.ActivityLevel ?? existingProfile.ActivityLevel;
-            existingProfile.Goal = request.Goal ?? existingProfile.Goal;
             existingProfile.Climate = request.Climate ?? existingProfile.Climate;
 
             // Save changes in DB

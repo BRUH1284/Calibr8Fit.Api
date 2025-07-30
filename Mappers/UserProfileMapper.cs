@@ -18,7 +18,6 @@ namespace Calibr8Fit.Api.Mappers
                 TargetWeight = user.Profile!.TargetWeight,
                 Height = user.Profile!.Height,
                 ActivityLevel = user.Profile!.ActivityLevel,
-                Goal = user.Profile!.Goal,
                 Climate = user.Profile!.Climate
             };
         }

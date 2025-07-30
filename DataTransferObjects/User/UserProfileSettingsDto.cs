@@ -13,7 +13,6 @@ namespace Calibr8Fit.Api.DataTransferObjects.User
         public float? TargetWeight { get; set; }
         public float? Height { get; set; }
         public UserActivityLevel? ActivityLevel { get; set; }
-        public UserGoal? Goal { get; set; }
         public UserClimate? Climate { get; set; }
     }
 }

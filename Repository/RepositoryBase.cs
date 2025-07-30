@@ -1,10 +1,6 @@
 using Calibr8Fit.Api.Data;
 
-public abstract class RepositoryBase
+public abstract class RepositoryBase(ApplicationDbContext context)
 {
-    protected readonly ApplicationDbContext _context;
-    public RepositoryBase(ApplicationDbContext context)
-    {
-        _context = context;
-    }
+    protected readonly ApplicationDbContext _context = context;
 }

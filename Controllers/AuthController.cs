@@ -8,20 +8,15 @@ namespace Calibr8Fit.Api.Controllers
 {
     [Route("api/auth")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController(
+        IRefreshTokenRepository refreshTokenRepo,
+        IAuthService authService,
+        ICurrentUserService currentUserService
+        ) : ControllerBase
     {
-        private readonly IRefreshTokenRepository _refreshTokenRepo;
-        private readonly IAuthService _authService;
-        private readonly ICurrentUserService _currentUserService;
-        public AuthController(
-            IRefreshTokenRepository refreshTokenRepo,
-            IAuthService authService,
-            ICurrentUserService currentUserService)
-        {
-            _refreshTokenRepo = refreshTokenRepo;
-            _authService = authService;
-            _currentUserService = currentUserService;
-        }
+        private readonly IRefreshTokenRepository _refreshTokenRepo = refreshTokenRepo;
+        private readonly IAuthService _authService = authService;
+        private readonly ICurrentUserService _currentUserService = currentUserService;
 
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync([FromBody] RegisterDto registerDto)
@@ -56,13 +51,12 @@ namespace Calibr8Fit.Api.Controllers
         {
             // Find user in DB
             var user = await _currentUserService.GetCurrentUserAsync(User);
-            if (user == null) return Unauthorized("User not found.");
+            if (user is null) return Unauthorized("User not found.");
 
             // Delete refresh token for user and device
-            if (await _refreshTokenRepo.DeleteAsync(user.Id, deviceId) == null)
-                return NotFound("Refresh token not found for this user and device.");
-
-            return NoContent();
+            return await _refreshTokenRepo.DeleteAsync(user.Id, deviceId) is null
+                ? NotFound("Refresh token not found for this user and device.")
+                : NoContent();
         }
         [HttpPost("logout-all")]
         [Authorize]
@@ -70,13 +64,12 @@ namespace Calibr8Fit.Api.Controllers
         {
             // Find user in DB
             var user = await _currentUserService.GetCurrentUserAsync(User);
-            if (user == null) return Unauthorized("User not found.");
+            if (user is null) return Unauthorized("User not found.");
 
             // Delete all refresh tokens for user
-            if (await _refreshTokenRepo.DeleteAllAsync(user.Id) == null)
-                return NotFound("No refresh tokens found for this user.");
-
-            return NoContent();
+            return await _refreshTokenRepo.DeleteAllAsync(user.Id) is null
+                ? NotFound("No refresh tokens found for this user.")
+                : NoContent();
         }
     }
 }
