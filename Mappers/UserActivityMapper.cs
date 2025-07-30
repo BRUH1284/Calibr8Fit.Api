@@ -12,7 +12,8 @@ namespace Calibr8Fit.Api.Mappers
                 Id = userActivity.Id,
                 MajorHeading = userActivity.MajorHeading,
                 MetValue = userActivity.MetValue,
-                Description = userActivity.Description
+                Description = userActivity.Description,
+                UpdatedAt = userActivity.UpdatedAt
             };
         }
         public static UserActivity ToUserActivity(this AddUserActivityRequestDto requestDto, string userId)
@@ -22,7 +23,8 @@ namespace Calibr8Fit.Api.Mappers
                 UserId = userId,
                 MajorHeading = requestDto.MajorHeading,
                 MetValue = requestDto.MetValue,
-                Description = requestDto.Description
+                Description = requestDto.Description,
+                UpdatedAt = requestDto.UpdatedAt
             };
         }
         public static UserActivity ToUserActivity(this UserActivityDto activityDto, string userId)
@@ -33,7 +35,8 @@ namespace Calibr8Fit.Api.Mappers
                 Id = activityDto.Id,
                 MajorHeading = activityDto.MajorHeading,
                 MetValue = activityDto.MetValue,
-                Description = activityDto.Description
+                Description = activityDto.Description,
+                UpdatedAt = activityDto.UpdatedAt
             };
         }
     }

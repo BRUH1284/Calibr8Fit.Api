@@ -10,5 +10,7 @@ namespace Calibr8Fit.Api.DataTransferObjects.Activity
         public required float MetValue { get; set; }
         [Required]
         public required string Description { get; set; }
+        [Required]
+        public required DateTime UpdatedAt { get; set; }
     }
 }

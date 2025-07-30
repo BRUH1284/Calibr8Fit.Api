@@ -19,6 +19,7 @@ namespace Calibr8Fit.Api.Repository
                     ua.MajorHeading,
                     ua.MetValue,
                     ua.Description,
+                    ua.UpdatedAt
                 })
                 .ToListAsync();
 
@@ -78,6 +79,7 @@ namespace Calibr8Fit.Api.Repository
             existingUserActivity.MajorHeading = requestDto.MajorHeading;
             existingUserActivity.MetValue = requestDto.MetValue;
             existingUserActivity.Description = requestDto.Description;
+            existingUserActivity.UpdatedAt = DateTime.UtcNow;
 
             // Save changes in DB
             await _context.SaveChangesAsync();
