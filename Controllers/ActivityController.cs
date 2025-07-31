@@ -5,6 +5,7 @@ using Calibr8Fit.Api.Mappers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+// TODO: upload and update multiple activities
 namespace Calibr8Fit.Api.Controllers
 {
     [Route("api/activity")]
@@ -131,50 +132,52 @@ namespace Calibr8Fit.Api.Controllers
         }
         [HttpPost("my")]
         [Authorize]
-        public async Task<IActionResult> AddUserActivity([FromBody] AddUserActivityRequestDto userActivityDto)
+        public async Task<IActionResult> AddUserActivities([FromBody] List<AddUserActivityRequestDto> userActivityDtos)
         {
             // Find user in DB
             var user = await _currentUserService.GetCurrentUserAsync(User);
             if (user is null) return Unauthorized("User not found.");
 
-            // Add new user activity
-            var addedActivity = await _userActivityRepository.AddAsync(userActivityDto.ToUserActivity(user.Id));
+            // Add new user activities to DB
+            var addedActivities = await _userActivityRepository.AddRangeAsync(userActivityDtos.Select(dto => dto.ToUserActivity(user.Id)));
+
+            Console.WriteLine(addedActivities[0].Id);
 
             // If activity is null, return BadRequest
-            return addedActivity is null
-                ? BadRequest("Failed to add user activity.")
-                : CreatedAtAction(nameof(GetUserActivityById), new { id = addedActivity.Id }, addedActivity.ToUserActivityDto());
+            return addedActivities.Count == 0
+                ? BadRequest("Failed to add user activities.")
+                : CreatedAtAction(nameof(GetUserActivities), new { userId = user.Id }, addedActivities.Select(a => a.ToUserActivityDto()));
         }
-        [HttpPut("my/{id}")]
+        [HttpPut("my")]
         [Authorize]
-        public async Task<IActionResult> UpdateUserActivity(Guid id, [FromBody] UpdateActivityRequestDto updateDto)
+        public async Task<IActionResult> UpdateUserActivities([FromBody] List<UpdateUserActivityRequestDto> updateDtos)
         {
             // Find user in DB
             var user = await _currentUserService.GetCurrentUserAsync(User);
             if (user is null) return Unauthorized("User not found.");
 
-            // Update user activity
-            var updatedActivity = await _userActivityRepository.UpdateByUserIdAndIdAsync(user.Id, id, updateDto);
+            // Update user activities
+            var updatedActivities = await _userActivityRepository.UpdateRangeByUserIdAsync(user.Id, updateDtos);
 
-            // If activity is null, return NotFound
-            return updatedActivity is null
-                ? NotFound($"User activity with id: {id} not found.")
-                : Ok(updatedActivity.ToUserActivityDto());
+            // If no activities were updated, return NotFound
+            return updatedActivities.Count == 0
+                ? NotFound("No matching user activities were updated.")
+                : Ok(updatedActivities.Select(a => a.ToUserActivityDto()));
         }
-        [HttpDelete("my/{id}")]
+        [HttpDelete("my")]
         [Authorize]
-        public async Task<IActionResult> DeleteUserActivity(Guid id)
+        public async Task<IActionResult> DeleteUserActivities([FromBody] List<Guid> ids)
         {
             // Find user in DB
             var user = await _currentUserService.GetCurrentUserAsync(User);
             if (user is null) return Unauthorized("User not found.");
 
-            // Delete user activity
-            var deletedActivity = await _userActivityRepository.DeleteByUserIdAndIdAsync(user.Id, id);
+            // Delete user activities
+            var deletedActivities = await _userActivityRepository.DeleteRangeByUserIdAndIdAsync(user.Id, ids);
 
-            // If activity is null, return NotFound
-            return deletedActivity is null
-                ? NotFound($"User activity with id: {id} not found.")
+            // If no activities were deleted, return NotFound
+            return deletedActivities.Count == 0
+                ? NotFound("No matching user activities were deleted.")
                 : NoContent();
         }
     }

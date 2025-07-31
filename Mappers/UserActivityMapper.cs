@@ -39,5 +39,17 @@ namespace Calibr8Fit.Api.Mappers
                 UpdatedAt = activityDto.UpdatedAt
             };
         }
+        public static UserActivity ToUserActivity(this UpdateUserActivityRequestDto requestDto, string userId)
+        {
+            return new UserActivity
+            {
+                UserId = userId,
+                Id = requestDto.Id,
+                MajorHeading = requestDto.MajorHeading,
+                MetValue = requestDto.MetValue,
+                Description = requestDto.Description,
+                UpdatedAt = requestDto.UpdatedAt
+            };
+        }
     }
 }
