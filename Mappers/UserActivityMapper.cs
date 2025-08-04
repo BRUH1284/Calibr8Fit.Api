@@ -13,7 +13,9 @@ namespace Calibr8Fit.Api.Mappers
                 MajorHeading = userActivity.MajorHeading,
                 MetValue = userActivity.MetValue,
                 Description = userActivity.Description,
-                UpdatedAt = userActivity.UpdatedAt
+                SyncedAt = userActivity.SyncedAt,
+                ModifiedAt = userActivity.ModifiedAt,
+                Deleted = userActivity.Deleted
             };
         }
         public static UserActivity ToUserActivity(this AddUserActivityRequestDto requestDto, string userId)
@@ -25,7 +27,8 @@ namespace Calibr8Fit.Api.Mappers
                 MajorHeading = requestDto.MajorHeading,
                 MetValue = requestDto.MetValue,
                 Description = requestDto.Description,
-                UpdatedAt = requestDto.UpdatedAt
+                ModifiedAt = requestDto.ModifiedAt,
+                Deleted = requestDto.Deleted
             };
         }
         public static UserActivity ToUserActivity(this UserActivityDto activityDto, string userId)
@@ -37,7 +40,8 @@ namespace Calibr8Fit.Api.Mappers
                 MajorHeading = activityDto.MajorHeading,
                 MetValue = activityDto.MetValue,
                 Description = activityDto.Description,
-                UpdatedAt = activityDto.UpdatedAt
+                ModifiedAt = activityDto.ModifiedAt,
+                Deleted = activityDto.Deleted
             };
         }
         public static UserActivity ToUserActivity(this UpdateUserActivityRequestDto requestDto, string userId)
@@ -49,7 +53,8 @@ namespace Calibr8Fit.Api.Mappers
                 MajorHeading = requestDto.MajorHeading,
                 MetValue = requestDto.MetValue,
                 Description = requestDto.Description,
-                UpdatedAt = requestDto.UpdatedAt
+                ModifiedAt = requestDto.ModifiedAt,
+                Deleted = requestDto.Deleted
             };
         }
     }

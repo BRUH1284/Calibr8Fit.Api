@@ -6,6 +6,8 @@ namespace Calibr8Fit.Api.DataTransferObjects.Activity
         public required string MajorHeading { get; set; }
         public required float MetValue { get; set; }
         public required string Description { get; set; }
-        public required DateTime UpdatedAt { get; set; }
+        public required DateTime SyncedAt { get; set; }
+        public required DateTime ModifiedAt { get; set; }
+        public required bool Deleted { get; set; }
     }
 }

@@ -1,4 +1,3 @@
-using Calibr8Fit.Api.DataTransferObjects.Activity;
 using Calibr8Fit.Api.Models;
 
 namespace Calibr8Fit.Api.Interfaces.Repository
@@ -10,11 +9,11 @@ namespace Calibr8Fit.Api.Interfaces.Repository
         Task<UserActivity?> GetByUserIdAndIdAsync(string userId, Guid id);
         Task<UserActivity?> GetByIdAsync(Guid id);
         Task<List<UserActivity>> GetAllByUserIdAsync(string userId);
-        Task<UserActivity?> UpdateByUserIdAsync(string userId, UpdateUserActivityRequestDto requestDto);
-        Task<List<UserActivity>> UpdateRangeByUserIdAsync(string userId, IEnumerable<UpdateUserActivityRequestDto> requestDtos);
-        Task<UserActivity?> UpdateAsync(UpdateUserActivityRequestDto requestDto);
-        Task<UserActivity?> DeleteByUserIdAndIdAsync(string userId, Guid id);
-        Task<List<UserActivity>> DeleteRangeByUserIdAndIdAsync(string userId, IEnumerable<Guid> ids);
-        Task<UserActivity?> DeleteAsync(Guid id);
+        Task<UserActivity?> UpdateByUserIdAsync(string userId, UserActivity updateActivity);
+        Task<List<UserActivity>> UpdateRangeByUserIdAsync(string userId, IEnumerable<UserActivity> updateActivities);
+        Task<UserActivity?> UpdateAsync(UserActivity updateActivity);
+        Task<UserActivity?> DeleteByUserIdAndIdAsync(string userId, Guid id, DateTime deletedAt);
+        Task<List<UserActivity>> DeleteRangeByUserIdAndIdAsync(string userId, IEnumerable<(Guid id, DateTime deletedAt)> ids);
+        Task<UserActivity?> DeleteAsync(Guid id, DateTime deletedAt);
     }
 }

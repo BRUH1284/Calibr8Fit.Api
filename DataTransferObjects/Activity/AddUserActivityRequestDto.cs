@@ -12,6 +12,7 @@ namespace Calibr8Fit.Api.DataTransferObjects.Activity
         [Required]
         public required string Description { get; set; }
         [Required]
-        public required DateTime UpdatedAt { get; set; }
+        public required DateTime ModifiedAt { get; set; }
+        public bool Deleted { get; set; } = false; // Default to false if not specified
     }
 }

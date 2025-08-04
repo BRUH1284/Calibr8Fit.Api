@@ -154,7 +154,7 @@ namespace Calibr8Fit.Api.Controllers
             if (user is null) return Unauthorized("User not found.");
 
             // Update user activities
-            var updatedActivities = await _userActivityRepository.UpdateRangeByUserIdAsync(user.Id, updateDtos);
+            var updatedActivities = await _userActivityRepository.UpdateRangeByUserIdAsync(user.Id, updateDtos.Select(dto => dto.ToUserActivity(user.Id)));
 
             // If no activities were updated, return NotFound
             return updatedActivities.Count == 0
@@ -163,14 +163,14 @@ namespace Calibr8Fit.Api.Controllers
         }
         [HttpDelete("my")]
         [Authorize]
-        public async Task<IActionResult> DeleteUserActivities([FromBody] List<Guid> ids)
+        public async Task<IActionResult> DeleteUserActivities([FromBody] List<DeleteUserActivityRequestDto> deleteDtos)
         {
             // Find user in DB
             var user = await _currentUserService.GetCurrentUserAsync(User);
             if (user is null) return Unauthorized("User not found.");
 
             // Delete user activities
-            var deletedActivities = await _userActivityRepository.DeleteRangeByUserIdAndIdAsync(user.Id, ids);
+            var deletedActivities = await _userActivityRepository.DeleteRangeByUserIdAndIdAsync(user.Id, deleteDtos.Select(dto => (dto.Id, dto.DeletedAt)));
 
             // If no activities were deleted, return NotFound
             return deletedActivities.Count == 0

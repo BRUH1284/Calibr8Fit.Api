@@ -1,5 +1,4 @@
 using Calibr8Fit.Api.Data;
-using Calibr8Fit.Api.DataTransferObjects.Activity;
 using Calibr8Fit.Api.Interfaces.Repository;
 using Calibr8Fit.Api.Models;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +17,7 @@ namespace Calibr8Fit.Api.Repository
                     ua.MajorHeading,
                     ua.MetValue,
                     ua.Description,
-                    ua.UpdatedAt
+                    ua.ModifiedAt
                 })
                 .ToListAsync();
 
@@ -77,60 +76,65 @@ namespace Calibr8Fit.Api.Repository
                 .Where(ua => ua.UserId == userId)
                 .ToListAsync();
         }
-        public async Task<UserActivity?> UpdateByUserIdAsync(string userId, UpdateUserActivityRequestDto updateRequest)
+        public async Task<UserActivity?> UpdateByUserIdAsync(string userId, UserActivity updatedActivity)
         {
             // Get existing activity by userId and id
             var existingUserActivity = await _context.UserActivities
-                .FirstOrDefaultAsync(ua => ua.UserId == userId && ua.Id == updateRequest.Id);
+                .FirstOrDefaultAsync(ua => ua.UserId == userId && ua.Id == updatedActivity.Id);
             if (existingUserActivity is null) return null;
 
             // Update properties
-            UpdateProperties(existingUserActivity, updateRequest);
+            UpdateProperties(existingUserActivity, updatedActivity);
 
             // Save changes in DB
             await _context.SaveChangesAsync();
             return existingUserActivity;
         }
-        public async Task<UserActivity?> UpdateAsync(UpdateUserActivityRequestDto requestDto)
+        public async Task<UserActivity?> UpdateAsync(UserActivity updatedActivity)
         {
             // Get existing activity by id
-            var existingUserActivity = await _context.UserActivities.FirstAsync(ua => ua.Id == requestDto.Id);
+            var existingUserActivity = await _context.UserActivities.FirstAsync(ua => ua.Id == updatedActivity.Id);
             if (existingUserActivity is null) return null;
 
             // Update properties
-            UpdateProperties(existingUserActivity, requestDto);
+            UpdateProperties(existingUserActivity, updatedActivity);
 
             // Save changes in DB
             await _context.SaveChangesAsync();
             return existingUserActivity;
         }
-        public async Task<List<UserActivity>> UpdateRangeByUserIdAsync(string userId, IEnumerable<UpdateUserActivityRequestDto> requestDtos)
+        public async Task<List<UserActivity>> UpdateRangeByUserIdAsync(string userId, IEnumerable<UserActivity> updatedActivities)
         {
             var existingActivities = await _context.UserActivities
-                .Where(ua => ua.UserId == userId && requestDtos.Select(r => r.Id).Contains(ua.Id))
+                .Where(ua => ua.UserId == userId && updatedActivities.Select(r => r.Id).Contains(ua.Id))
                 .ToListAsync();
 
             foreach (var existingUserActivity in existingActivities)
             {
-                // Find the corresponding requestDto and update properties
-                var requestDto = requestDtos.FirstOrDefault(r => r.Id == existingUserActivity.Id);
-                UpdateProperties(existingUserActivity, requestDto!);
+                // Find the corresponding updatedActivity and update properties
+                var updatedActivity = updatedActivities.FirstOrDefault(r => r.Id == existingUserActivity.Id);
+                UpdateProperties(existingUserActivity, updatedActivity!);
             }
 
             // Save changes in DB
             await _context.SaveChangesAsync();
             return existingActivities;
         }
-        private static UserActivity UpdateProperties(UserActivity existingUserActivity, UpdateUserActivityRequestDto requestDto)
+        private static UserActivity UpdateProperties(UserActivity existingUserActivity, UserActivity updateActivity)
         {
-            existingUserActivity.MajorHeading = requestDto.MajorHeading;
-            existingUserActivity.MetValue = requestDto.MetValue;
-            existingUserActivity.Description = requestDto.Description;
-            existingUserActivity.UpdatedAt = requestDto.UpdatedAt;
+            // Update properties
+            existingUserActivity.MajorHeading = updateActivity.MajorHeading;
+            existingUserActivity.MetValue = updateActivity.MetValue;
+            existingUserActivity.Description = updateActivity.Description;
+            existingUserActivity.ModifiedAt = updateActivity.ModifiedAt;
+            existingUserActivity.Deleted = updateActivity.Deleted;
+
+            // Update synced time
+            existingUserActivity.SyncedAt = DateTime.UtcNow;
 
             return existingUserActivity;
         }
-        public async Task<UserActivity?> DeleteByUserIdAndIdAsync(string userId, Guid id)
+        public async Task<UserActivity?> DeleteByUserIdAndIdAsync(string userId, Guid id, DateTime deletedAt)
         {
             // Get existing activity by userId and id
             var existingUserActivity = await _context.UserActivities
@@ -138,36 +142,53 @@ namespace Calibr8Fit.Api.Repository
             if (existingUserActivity is null) return null;
 
             // Remove activity from DB
-            await RemoveAsync(existingUserActivity);
+            await DeleteAsync(existingUserActivity, deletedAt);
             return existingUserActivity;
         }
-        public async Task<UserActivity?> DeleteAsync(Guid id)
+        public async Task<UserActivity?> DeleteAsync(Guid id, DateTime deletedAt)
         {
             // Get existing activity by code
             var existingUserActivity = await _context.UserActivities.FirstAsync(ua => ua.Id == id);
             if (existingUserActivity is null) return null;
 
             // Remove activity from DB
-            await RemoveAsync(existingUserActivity);
+            await DeleteAsync(existingUserActivity, deletedAt);
             return existingUserActivity;
         }
-        public async Task<List<UserActivity>> DeleteRangeByUserIdAndIdAsync(string userId, IEnumerable<Guid> ids)
+        public async Task<List<UserActivity>> DeleteRangeByUserIdAndIdAsync(string userId, IEnumerable<(Guid id, DateTime deletedAt)> ids)
         {
             // Get existing activities by userId and ids
             var existingActivities = await _context.UserActivities
-                .Where(ua => ua.UserId == userId && ids.Contains(ua.Id))
+                .Where(ua => ua.UserId == userId && ids.Select(x => x.id).Contains(ua.Id))
                 .ToListAsync();
 
-            // Remove activities from DB
-            _context.RemoveRange(existingActivities);
+            if (existingActivities.Count == 0)
+                return [];
+
+            // Mark each existing activity as deleted
+            foreach (var existingUserActivity in existingActivities)
+            {
+                // Find the corresponding ModifiedAt value
+                existingUserActivity.ModifiedAt = ids.First(x => x.id == existingUserActivity.Id).deletedAt;
+                // Mark as deleted
+                existingUserActivity.Deleted = true;
+                // Update synced time
+                existingUserActivity.SyncedAt = DateTime.UtcNow;
+            }
+            ;
 
             await _context.SaveChangesAsync();
             return existingActivities;
         }
-        private async Task RemoveAsync(UserActivity userActivity)
+        private async Task DeleteAsync(UserActivity userActivity, DateTime deletedAt)
         {
-            // Remove user activity from DB
-            _context.Remove(userActivity);
+            // Set ModifiedAt property
+            userActivity.ModifiedAt = deletedAt;
+            // Mark as deleted
+            userActivity.Deleted = true;
+            // Update synced time
+            userActivity.SyncedAt = DateTime.UtcNow;
+
             await _context.SaveChangesAsync();
         }
     }
