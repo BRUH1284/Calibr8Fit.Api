@@ -1,8 +1,6 @@
 using Calibr8Fit.Api.Data;
 using Calibr8Fit.Api.DataTransferObjects.Activity;
-using Calibr8Fit.Api.Interfaces;
 using Calibr8Fit.Api.Interfaces.Repository;
-using Calibr8Fit.Api.Mappers;
 using Calibr8Fit.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,10 +25,14 @@ namespace Calibr8Fit.Api.Repository
             // Generate checksum for the user activities
             return ((IDataChecksumProvider)this).GenerateChecksum(userActivities);
         }
-        public async Task<UserActivity> AddAsync(UserActivity userActivity)
+        public async Task<UserActivity?> AddAsync(UserActivity userActivity)
         {
+            // Check if user activity already exists
+            if (await _context.BaseActivities.FindAsync(userActivity.Id) is not null)
+                return null;
+
             // Add new user activity to DB
-            await _context.UserActivities.AddAsync(userActivity);
+            await _context.AddAsync(userActivity);
             await _context.SaveChangesAsync();
             return userActivity;
         }
@@ -38,15 +40,29 @@ namespace Calibr8Fit.Api.Repository
         {
             // Convert the IEnumerable to a List for EF Core
             var activitiesList = userActivities.ToList();
+
+            // Check if any user activity already exists
+            var existingActivities = await _context.UserActivities
+                .Where(ua => activitiesList.Select(a => a.Id).Contains(ua.Id))
+                .ToListAsync();
+
+            // Filter out existing activities
+            var newActivities = activitiesList
+                .Where(a => !existingActivities.Any(ea => ea.Id == a.Id))
+                .ToList();
+
+            if (newActivities.Count == 0)
+                return [];
+
             // Add multiple user activities to DB
-            await _context.UserActivities.AddRangeAsync(activitiesList);
+            await _context.AddRangeAsync(activitiesList);
             await _context.SaveChangesAsync();
             return activitiesList;
         }
         public async Task<UserActivity?> GetByIdAsync(Guid id)
         {
             // Get user activity by id
-            return await _context.UserActivities.FindAsync(id);
+            return await _context.UserActivities.FirstAsync(ua => ua.Id == id);
         }
         public async Task<UserActivity?> GetByUserIdAndIdAsync(string userId, Guid id)
         {
@@ -78,7 +94,7 @@ namespace Calibr8Fit.Api.Repository
         public async Task<UserActivity?> UpdateAsync(UpdateUserActivityRequestDto requestDto)
         {
             // Get existing activity by id
-            var existingUserActivity = await _context.UserActivities.FindAsync(requestDto.Id);
+            var existingUserActivity = await _context.UserActivities.FirstAsync(ua => ua.Id == requestDto.Id);
             if (existingUserActivity is null) return null;
 
             // Update properties
@@ -128,7 +144,7 @@ namespace Calibr8Fit.Api.Repository
         public async Task<UserActivity?> DeleteAsync(Guid id)
         {
             // Get existing activity by code
-            var existingUserActivity = await _context.UserActivities.FindAsync(id);
+            var existingUserActivity = await _context.UserActivities.FirstAsync(ua => ua.Id == id);
             if (existingUserActivity is null) return null;
 
             // Remove activity from DB
@@ -143,7 +159,7 @@ namespace Calibr8Fit.Api.Repository
                 .ToListAsync();
 
             // Remove activities from DB
-            _context.UserActivities.RemoveRange(existingActivities);
+            _context.RemoveRange(existingActivities);
 
             await _context.SaveChangesAsync();
             return existingActivities;
@@ -151,7 +167,7 @@ namespace Calibr8Fit.Api.Repository
         private async Task RemoveAsync(UserActivity userActivity)
         {
             // Remove user activity from DB
-            _context.UserActivities.Remove(userActivity);
+            _context.Remove(userActivity);
             await _context.SaveChangesAsync();
         }
     }

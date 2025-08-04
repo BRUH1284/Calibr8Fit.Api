@@ -5,7 +5,7 @@ namespace Calibr8Fit.Api.Interfaces.Repository
 {
     public interface IUserActivityRepository : IDataChecksumProvider
     {
-        Task<UserActivity> AddAsync(UserActivity userActivity);
+        Task<UserActivity?> AddAsync(UserActivity userActivity);
         Task<List<UserActivity>> AddRangeAsync(IEnumerable<UserActivity> userActivities);
         Task<UserActivity?> GetByUserIdAndIdAsync(string userId, Guid id);
         Task<UserActivity?> GetByIdAsync(Guid id);

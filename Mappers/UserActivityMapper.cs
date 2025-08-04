@@ -20,6 +20,7 @@ namespace Calibr8Fit.Api.Mappers
         {
             return new UserActivity
             {
+                Id = requestDto.Id,
                 UserId = userId,
                 MajorHeading = requestDto.MajorHeading,
                 MetValue = requestDto.MetValue,

@@ -10,7 +10,7 @@ namespace Calibr8Fit.Api.Mappers
         {
             return new ActivityDto
             {
-                Code = activity.Code,
+                Id = activity.Id,
                 MajorHeading = activity.MajorHeading,
                 MetValue = activity.MetValue,
                 Description = activity.Description
@@ -20,7 +20,16 @@ namespace Calibr8Fit.Api.Mappers
         {
             return new Activity
             {
-                Code = activityDto.Code,
+                Id = activityDto.Id,
+                MajorHeading = activityDto.MajorHeading,
+                MetValue = activityDto.MetValue,
+                Description = activityDto.Description
+            };
+        }
+        public static Activity ToActivity(this AddActivityRequestDto activityDto)
+        {
+            return new Activity
+            {
                 MajorHeading = activityDto.MajorHeading,
                 MetValue = activityDto.MetValue,
                 Description = activityDto.Description

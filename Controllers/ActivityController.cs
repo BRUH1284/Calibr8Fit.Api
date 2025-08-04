@@ -5,7 +5,6 @@ using Calibr8Fit.Api.Mappers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-// TODO: upload and update multiple activities
 namespace Calibr8Fit.Api.Controllers
 {
     [Route("api/activity")]
@@ -39,20 +38,20 @@ namespace Calibr8Fit.Api.Controllers
 
             return Ok(activityDtos);
         }
-        [HttpGet("{code}")]
-        public async Task<IActionResult> GetActivityByCode(int code)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetActivityById(Guid id)
         {
-            // Get activity by code from DB
-            var activity = await _activityRepository.GetByCodeAsync(code);
+            // Get activity by id from DB
+            var activity = await _activityRepository.GetByIdAsync(id);
 
             // If activity is null, return NotFound
             return activity is null
-                ? NotFound($"Activity with code: {code} not found.")
+                ? NotFound($"Activity with id: {id} not found.")
                 : Ok(activity.ToActivityDto());
         }
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddActivity([FromBody] ActivityDto activityDto)
+        public async Task<IActionResult> AddActivity([FromBody] AddActivityRequestDto activityDto)
         {
             // Add new activity to DB
             var activity = await _activityRepository.AddAsync(activityDto.ToActivity());
@@ -60,28 +59,28 @@ namespace Calibr8Fit.Api.Controllers
             // If activity is null, return BadRequest
             return activity is null
                 ? BadRequest("Failed to add activity.")
-                : CreatedAtAction(nameof(GetActivityByCode), new { code = activity.Code }, activity.ToActivityDto());
+                : CreatedAtAction(nameof(GetActivityById), new { id = activity.Id }, activity.ToActivityDto());
         }
-        [HttpPut("{code}")]
+        [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateActivity(int code, [FromBody] UpdateActivityRequestDto updateDto)
+        public async Task<IActionResult> UpdateActivity(Guid id, [FromBody] UpdateActivityRequestDto updateDto)
         {
-            var activity = await _activityRepository.UpdateAsync(code, updateDto);
+            var activity = await _activityRepository.UpdateAsync(id, updateDto);
 
             // If activity is null, return NotFound
             return activity is null
-                ? NotFound($"Activity with code: {code} not found.")
+                ? NotFound($"Activity with id: {id} not found.")
                 : Ok(activity.ToActivityDto());
         }
-        [HttpDelete("{code}")]
+        [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteActivity(int code)
+        public async Task<IActionResult> DeleteActivity(Guid id)
         {
-            var activity = await _activityRepository.DeleteAsync(code);
+            var activity = await _activityRepository.DeleteAsync(id);
 
             // If activity is null, return NotFound
             return activity is null
-                ? NotFound($"Activity with code: {code} not found.")
+                ? NotFound($"Activity with id: {id} not found.")
                 : NoContent();
         }
         [HttpGet("my/checksum")]
@@ -140,8 +139,6 @@ namespace Calibr8Fit.Api.Controllers
 
             // Add new user activities to DB
             var addedActivities = await _userActivityRepository.AddRangeAsync(userActivityDtos.Select(dto => dto.ToUserActivity(user.Id)));
-
-            Console.WriteLine(addedActivities[0].Id);
 
             // If activity is null, return BadRequest
             return addedActivities.Count == 0

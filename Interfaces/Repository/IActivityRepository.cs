@@ -6,9 +6,9 @@ namespace Calibr8Fit.Api.Interfaces.Repository
     public interface IActivityRepository : IDataVersionProvider
     {
         Task<Activity?> AddAsync(Activity activity);
-        Task<Activity?> GetByCodeAsync(int code);
+        Task<Activity?> GetByIdAsync(Guid id);
         Task<List<Activity>> GetAllAsync();
-        Task<Activity?> UpdateAsync(int code, UpdateActivityRequestDto activityDto);
-        Task<Activity?> DeleteAsync(int code);
+        Task<Activity?> UpdateAsync(Guid id, UpdateActivityRequestDto activityDto);
+        Task<Activity?> DeleteAsync(Guid id);
     }
 }

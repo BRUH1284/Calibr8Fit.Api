@@ -1,8 +1,8 @@
-namespace Calibr8Fit.Api.DataTransferObjects.Activity
+namespace Calibr8Fit.Api.Models
 {
-    public class ActivityDto
+    public abstract class BaseActivity
     {
-        public required Guid Id { get; set; }
+        public Guid Id { get; set; }
         public required string MajorHeading { get; set; }
         public required float MetValue { get; set; }
         public required string Description { get; set; }

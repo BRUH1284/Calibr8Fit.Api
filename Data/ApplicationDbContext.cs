@@ -10,8 +10,9 @@ namespace Calibr8Fit.Api.Data
         public DbSet<DataVersion> DataVersions { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
-        public DbSet<Activity> Activities { get; set; }
-        public DbSet<UserActivity> UserActivities { get; set; }
+        public DbSet<BaseActivity> BaseActivities { get; set; }
+        public IQueryable<Activity> Activities => Set<BaseActivity>().OfType<Activity>();
+        public IQueryable<UserActivity> UserActivities => Set<BaseActivity>().OfType<UserActivity>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -36,10 +37,6 @@ namespace Calibr8Fit.Api.Data
             builder.Entity<DataVersion>()
                 .HasKey(dv => dv.DataResource); // DataResource is the primary key in DataVersion
 
-            // Configure Activity
-            builder.Entity<Activity>()
-                .HasKey(a => a.Code); // Code is the primary key in Activity
-
             // Configure User Profile
             builder.Entity<UserProfile>()
                 .HasKey(up => up.UserId); // UserId is the primary key in UserProfile
@@ -60,11 +57,17 @@ namespace Calibr8Fit.Api.Data
                 .HasForeignKey(rt => rt.UserId)
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> RefreshToken
 
-            // Configure UserActivity
-            builder.Entity<UserActivity>()
-                .Property(ua => ua.Id) // Id is the primary key in UserActivity
+            // Configure Activities
+            builder.Entity<BaseActivity>()
+                .HasDiscriminator<bool>("IsUserActivity")
+                .HasValue<Activity>(false)
+                .HasValue<UserActivity>(true);
+
+            builder.Entity<BaseActivity>()
+                .Property(a => a.Id) // Id is the primary key in BaseActivity
                 .HasDefaultValueSql("uuid_generate_v4()");
 
+            // Configure UserActivity
             builder.Entity<UserActivity>()
             .HasIndex(ua => new { ua.UserId, ua.Id }); // Composite index for UserId and and Id
 
