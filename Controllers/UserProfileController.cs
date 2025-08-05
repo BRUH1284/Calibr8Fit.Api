@@ -43,14 +43,14 @@ namespace Calibr8Fit.Api.Controllers
         }
         [HttpPut("settings")]
         [Authorize]
-        public async Task<IActionResult> UpdateMyProfileSettingsAsync([FromBody] UserProfileSettingsDto request)
+        public async Task<IActionResult> UpdateMyProfileSettingsAsync([FromBody] UpdateUserProfileSettingsRequestDto requestDto)
         {
             // Find user in DB
             var user = await _currentUserService.GetCurrentUserAsync(User);
             if (user?.Profile is null) return Unauthorized("User profile not found.");
 
             // Update user profile settings
-            await _userProfileRepository.UpdateAsync(user.Id, request);
+            await _userProfileRepository.UpdateAsync(requestDto.ToUserProfile(user));
 
             // Return updated profile settings
             return Ok(user.ToUserProfileSettingsDto());

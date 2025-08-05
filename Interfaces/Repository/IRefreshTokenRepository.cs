@@ -2,12 +2,9 @@ using Calibr8Fit.Api.Models;
 
 namespace Calibr8Fit.Api.Interfaces.Repository
 {
-    public interface IRefreshTokenRepository
+    public interface IRefreshTokenRepository : IUserRepositoryBase<RefreshToken>
     {
-        Task<List<RefreshToken>> GetByUserIdAsync(string userId);
         Task<RefreshToken?> GetByUserIdAndDeviceIdAsync(string userId, string deviceId);
-        Task<RefreshToken?> DeleteAsync(string userId, string deviceId);
-        Task<List<RefreshToken>?> DeleteAllAsync(string userId);
-        Task<RefreshToken> UpdateOrCreateAsync(RefreshToken refreshToken);
+        Task<RefreshToken?> DeleteByUserIdAndDeviceIdAsync(string userId, string deviceId);
     }
 }

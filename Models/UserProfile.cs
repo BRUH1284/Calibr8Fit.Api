@@ -1,8 +1,9 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using Calibr8Fit.Api.Enums;
 
 namespace Calibr8Fit.Api.Models
 {
-    public class UserProfile
+    public class UserProfile : EntityBase<string>
     {
         public required string UserId { get; set; }
         public string FirstName { get; set; } = "";
@@ -14,5 +15,12 @@ namespace Calibr8Fit.Api.Models
         public float Height { get; set; } = 0.0f;
         public UserActivityLevel ActivityLevel { get; set; } = UserActivityLevel.Sedentary;
         public UserClimate Climate { get; set; } = UserClimate.Temperate;
+
+        [NotMapped]
+        public override string? Id
+        {
+            get => UserId;
+            set => UserId = value!;
+        }
     }
 }

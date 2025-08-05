@@ -54,7 +54,7 @@ namespace Calibr8Fit.Api.Controllers
             if (user is null) return Unauthorized("User not found.");
 
             // Delete refresh token for user and device
-            return await _refreshTokenRepo.DeleteAsync(user.Id, deviceId) is null
+            return await _refreshTokenRepo.DeleteByUserIdAndDeviceIdAsync(user.Id, deviceId) is null
                 ? NotFound("Refresh token not found for this user and device.")
                 : NoContent();
         }
@@ -67,7 +67,7 @@ namespace Calibr8Fit.Api.Controllers
             if (user is null) return Unauthorized("User not found.");
 
             // Delete all refresh tokens for user
-            return await _refreshTokenRepo.DeleteAllAsync(user.Id) is null
+            return await _refreshTokenRepo.DeleteAllByUserIdAsync(user.Id) is null
                 ? NotFound("No refresh tokens found for this user.")
                 : NoContent();
         }

@@ -42,7 +42,7 @@ namespace Calibr8Fit.Api.Controllers
         public async Task<IActionResult> GetActivityById(Guid id)
         {
             // Get activity by id from DB
-            var activity = await _activityRepository.GetByIdAsync(id);
+            var activity = await _activityRepository.GetAsync(id);
 
             // If activity is null, return NotFound
             return activity is null
@@ -63,13 +63,13 @@ namespace Calibr8Fit.Api.Controllers
         }
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateActivity(Guid id, [FromBody] UpdateActivityRequestDto updateDto)
+        public async Task<IActionResult> UpdateActivity([FromBody] UpdateActivityRequestDto updateDto)
         {
-            var activity = await _activityRepository.UpdateAsync(id, updateDto);
+            var activity = await _activityRepository.UpdateAsync(updateDto.ToActivity());
 
             // If activity is null, return NotFound
             return activity is null
-                ? NotFound($"Activity with id: {id} not found.")
+                ? NotFound($"Activity with id: {updateDto.Id} not found.")
                 : Ok(activity.ToActivityDto());
         }
         [HttpDelete("{id}")]
@@ -85,20 +85,20 @@ namespace Calibr8Fit.Api.Controllers
         }
         [HttpGet("my/checksum")]
         [Authorize]
-        public async Task<IActionResult> GetUserActivitiesChecksum()
-        {
-            // Find user in DB
-            var user = await _currentUserService.GetCurrentUserAsync(User);
-            if (user is null) return Unauthorized("User not found.");
+        // public async Task<IActionResult> GetUserActivitiesChecksum()
+        // {
+        //     // Find user in DB
+        //     var user = await _currentUserService.GetCurrentUserAsync(User);
+        //     if (user is null) return Unauthorized("User not found.");
 
-            // Get user's activities checksum
-            var checksum = await _userActivityRepository.GenerateUserDataChecksumAsync(user.Id);
+        //     // Get user's activities checksum
+        //     var checksum = await _userActivityRepository.GenerateUserDataChecksumAsync(user.Id);
 
-            // If checksum is null, return NotFound
-            return checksum is null
-                ? NotFound("No activities found for this user.")
-                : Ok(checksum);
-        }
+        //     // If checksum is null, return NotFound
+        //     return checksum is null
+        //         ? NotFound("No activities found for this user.")
+        //         : Ok(checksum);
+        // }
         [HttpGet("my")]
         [Authorize]
         public async Task<IActionResult> GetUserActivities()
@@ -122,7 +122,7 @@ namespace Calibr8Fit.Api.Controllers
             if (user is null) return Unauthorized("User not found.");
 
             // Get user activity by id
-            var userActivity = await _userActivityRepository.GetByUserIdAndIdAsync(user.Id, id);
+            var userActivity = await _userActivityRepository.GetByUserIdAndKeyAsync(user.Id, id);
 
             // If activity is null, return NotFound
             return userActivity is null
@@ -170,7 +170,7 @@ namespace Calibr8Fit.Api.Controllers
             if (user is null) return Unauthorized("User not found.");
 
             // Delete user activities
-            var deletedActivities = await _userActivityRepository.DeleteRangeByUserIdAndIdAsync(user.Id, deleteDtos.Select(dto => (dto.Id, dto.DeletedAt)));
+            var deletedActivities = await _userActivityRepository.DeleteRangeByUserIdAndKeyAsync(user.Id, (IEnumerable<object[]>)deleteDtos.Select(dto => dto.Id));
 
             // If no activities were deleted, return NotFound
             return deletedActivities.Count == 0

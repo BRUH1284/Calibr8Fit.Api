@@ -1,6 +1,7 @@
+
 namespace Calibr8Fit.Api.Models
 {
-    public class Activity : BaseActivity
+    public class Activity : ActivityBase
     {
 
     }

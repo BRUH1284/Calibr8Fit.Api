@@ -5,7 +5,9 @@ using Calibr8Fit.Api.Models;
 
 namespace Calibr8Fit.Api.Repository
 {
-    public class DataVersionRepository(ApplicationDbContext context) : RepositoryBase(context), IDataVersionRepository
+    public class DataVersionRepository(
+        ApplicationDbContext context
+    ) : RepositoryBase<DataVersion>(context), IDataVersionRepository
     {
         public async Task<DataVersion> AddOrUpdateAsync(DataResource dataResource)
         {

@@ -10,9 +10,9 @@ namespace Calibr8Fit.Api.Data
         public DbSet<DataVersion> DataVersions { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
-        public DbSet<BaseActivity> BaseActivities { get; set; }
-        public IQueryable<Activity> Activities => Set<BaseActivity>().OfType<Activity>();
-        public IQueryable<UserActivity> UserActivities => Set<BaseActivity>().OfType<UserActivity>();
+        public DbSet<ActivityBase> BaseActivities { get; set; }
+        public IQueryable<Activity> Activities => Set<ActivityBase>().OfType<Activity>();
+        public IQueryable<UserActivity> UserActivities => Set<ActivityBase>().OfType<UserActivity>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -58,12 +58,12 @@ namespace Calibr8Fit.Api.Data
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> RefreshToken
 
             // Configure Activities
-            builder.Entity<BaseActivity>()
+            builder.Entity<ActivityBase>()
                 .HasDiscriminator<bool>("IsUserActivity")
                 .HasValue<Activity>(false)
                 .HasValue<UserActivity>(true);
 
-            builder.Entity<BaseActivity>()
+            builder.Entity<ActivityBase>()
                 .Property(a => a.Id) // Id is the primary key in BaseActivity
                 .HasDefaultValueSql("uuid_generate_v4()");
 

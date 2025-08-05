@@ -30,5 +30,21 @@ namespace Calibr8Fit.Api.Mappers
                 LastName = user.Profile!.LastName,
             };
         }
+        public static UserProfile ToUserProfile(this UpdateUserProfileSettingsRequestDto dto, User user)
+        {
+            return new UserProfile
+            {
+                UserId = user.Id,
+                FirstName = dto.FirstName ?? user.Profile!.FirstName,
+                LastName = dto.LastName ?? user.Profile!.LastName,
+                DateOfBirth = dto.DateOfBirth ?? user.Profile!.DateOfBirth,
+                Gender = dto.Gender ?? user.Profile!.Gender,
+                Weight = dto.Weight ?? user.Profile!.Weight,
+                TargetWeight = dto.TargetWeight ?? user.Profile!.TargetWeight,
+                Height = dto.Height ?? user.Profile!.Height,
+                ActivityLevel = dto.ActivityLevel ?? user.Profile!.ActivityLevel,
+                Climate = dto.Climate ?? user.Profile!.Climate
+            };
+        }
     }
 }

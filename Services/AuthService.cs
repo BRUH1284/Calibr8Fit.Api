@@ -129,7 +129,7 @@ namespace Calibr8Fit.Api.Services
             (var refreshTokenDto, var refreshTokenString) = _tokenService.GenerateRefreshToken(user.Id, deviceId, refreshTokenExpirationTime);
 
             // Save new or update existing token for specified user device 
-            await _refreshTokenRepo.UpdateOrCreateAsync(refreshTokenDto);
+            await _refreshTokenRepo.AddOrUpdateAsync(refreshTokenDto);
 
             // Create token dto
             return new TokenDto
