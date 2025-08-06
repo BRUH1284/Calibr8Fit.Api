@@ -49,6 +49,7 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<ISyncService<UserActivity, Guid>, SyncService<UserActivity, Guid>>();
 
 // Repositories
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
@@ -56,6 +57,8 @@ builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<IDataVersionRepository, DataVersionRepository>();
 builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
 builder.Services.AddScoped<IUserActivityRepository, UserActivityRepository>();
+builder.Services.AddScoped<IUserSyncRepository<UserActivity, Guid>, UserActivityRepository>();
+
 
 
 builder.Services.AddOpenApi("v1", options =>

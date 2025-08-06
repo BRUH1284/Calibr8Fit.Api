@@ -2,6 +2,7 @@ using Calibr8Fit.Api.DataTransferObjects.Activity;
 using Calibr8Fit.Api.Interfaces.Repository;
 using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Mappers;
+using Calibr8Fit.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,12 +13,14 @@ namespace Calibr8Fit.Api.Controllers
     public class ActivityController(
         IActivityRepository activityRepository,
         ICurrentUserService currentUserService,
-        IUserActivityRepository userActivityRepository
+        IUserActivityRepository userActivityRepository,
+        ISyncService<UserActivity, Guid> syncService
         ) : ControllerBase
     {
         private readonly IActivityRepository _activityRepository = activityRepository;
         private readonly ICurrentUserService _currentUserService = currentUserService;
         private readonly IUserActivityRepository _userActivityRepository = userActivityRepository;
+        private readonly ISyncService<UserActivity, Guid> _syncService = syncService;
 
         [HttpGet("last-updated-at")]
         public async Task<IActionResult> GetLastUpdatedAt()
@@ -59,7 +62,10 @@ namespace Calibr8Fit.Api.Controllers
             // If activity is null, return BadRequest
             return activity is null
                 ? BadRequest("Failed to add activity.")
-                : CreatedAtAction(nameof(GetActivityById), new { id = activity.Id }, activity.ToActivityDto());
+                : CreatedAtAction(
+                    nameof(GetActivityById),
+                    new { id = activity.Id },
+                    activity.ToActivityDto());
         }
         [HttpPut]
         [Authorize(Roles = "Admin")]
@@ -83,22 +89,36 @@ namespace Calibr8Fit.Api.Controllers
                 ? NotFound($"Activity with id: {id} not found.")
                 : NoContent();
         }
-        [HttpGet("my/checksum")]
+        [HttpGet("my/last-updated-at")]
         [Authorize]
-        // public async Task<IActionResult> GetUserActivitiesChecksum()
-        // {
-        //     // Find user in DB
-        //     var user = await _currentUserService.GetCurrentUserAsync(User);
-        //     if (user is null) return Unauthorized("User not found.");
+        public async Task<IActionResult> GetLastUserUpdatedAt()
+        {
+            // Find user in DB
+            var user = await _currentUserService.GetCurrentUserAsync(User);
+            if (user is null) return Unauthorized("User not found.");
 
-        //     // Get user's activities checksum
-        //     var checksum = await _userActivityRepository.GenerateUserDataChecksumAsync(user.Id);
+            // Get user's last updated time
+            var lastUpdatedAt = await _syncService.GetLastSyncedAtAsync(user.Id);
 
-        //     // If checksum is null, return NotFound
-        //     return checksum is null
-        //         ? NotFound("No activities found for this user.")
-        //         : Ok(checksum);
-        // }
+            return Ok(lastUpdatedAt);
+        }
+        [HttpPost("my/sync")]
+        [Authorize]
+        public async Task<IActionResult> SyncUserActivities([FromBody] SyncUserActivitiesRequestDto requestDto)
+        {
+            // Find user in DB
+            var user = await _currentUserService.GetCurrentUserAsync(User);
+            if (user is null) return Unauthorized("User not found.");
+
+            // get synced activities from request DTOs
+            var result = await _syncService.Sync(
+                user.Id,
+                requestDto.UserActivities.Select(dto => dto.ToUserActivity(user.Id)),
+                requestDto.LastSyncedAt
+            );
+
+            return Ok(result.Select(a => a.ToUserActivityDto()).ToList());
+        }
         [HttpGet("my")]
         [Authorize]
         public async Task<IActionResult> GetUserActivities()
@@ -138,12 +158,16 @@ namespace Calibr8Fit.Api.Controllers
             if (user is null) return Unauthorized("User not found.");
 
             // Add new user activities to DB
-            var addedActivities = await _userActivityRepository.AddRangeAsync(userActivityDtos.Select(dto => dto.ToUserActivity(user.Id)));
+            var addedActivities = await _userActivityRepository
+                .AddRangeAsync(userActivityDtos.Select(dto => dto.ToUserActivity(user.Id)));
 
             // If activity is null, return BadRequest
             return addedActivities.Count == 0
                 ? BadRequest("Failed to add user activities.")
-                : CreatedAtAction(nameof(GetUserActivities), new { userId = user.Id }, addedActivities.Select(a => a.ToUserActivityDto()));
+                : CreatedAtAction(
+                    nameof(GetUserActivities),
+                    new { userId = user.Id },
+                    addedActivities.Select(a => a.ToUserActivityDto()));
         }
         [HttpPut("my")]
         [Authorize]
@@ -154,7 +178,8 @@ namespace Calibr8Fit.Api.Controllers
             if (user is null) return Unauthorized("User not found.");
 
             // Update user activities
-            var updatedActivities = await _userActivityRepository.UpdateRangeByUserIdAsync(user.Id, updateDtos.Select(dto => dto.ToUserActivity(user.Id)));
+            var updatedActivities = await _userActivityRepository
+                .UpdateRangeByUserIdAsync(user.Id, updateDtos.Select(dto => dto.ToUserActivity(user.Id)));
 
             // If no activities were updated, return NotFound
             return updatedActivities.Count == 0
@@ -170,7 +195,8 @@ namespace Calibr8Fit.Api.Controllers
             if (user is null) return Unauthorized("User not found.");
 
             // Delete user activities
-            var deletedActivities = await _userActivityRepository.DeleteRangeByUserIdAndKeyAsync(user.Id, deleteDtos.Select(dto => dto.Id));
+            var deletedActivities = await _userActivityRepository
+                .DeleteRangeByUserIdAndKeyAsync(user.Id, deleteDtos.Select(dto => dto.Id));
 
             // If no activities were deleted, return NotFound
             return deletedActivities.Count == 0

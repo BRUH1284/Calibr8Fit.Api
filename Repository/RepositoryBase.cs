@@ -23,6 +23,9 @@ namespace Calibr8Fit.Api.Repository
         }
         public virtual async Task<List<T>> GetRangeAsync(IEnumerable<TKey> keys)
         {
+            // If no keys provided, return empty list
+            if (!keys.Any()) return [];
+
             // Get range of entities by ids
             return await _dbSet
                 .Where(e => keys.Contains(e.Id))
@@ -53,6 +56,9 @@ namespace Calibr8Fit.Api.Repository
 
         public virtual async Task<List<T>> AddRangeAsync(IEnumerable<T> entities)
         {
+            // If no entities to add, return empty list
+            if (!entities.Any()) return [];
+
             var existingKeys = await KeyRangeExistsInHierarchyAsync(entities.Select(e => e.Id));
 
             // Filter out existing entities
@@ -108,6 +114,9 @@ namespace Calibr8Fit.Api.Repository
 
         public async Task<List<T>> UpdateRangeAsync(IEnumerable<T> updatedEntities)
         {
+            // If no entities to update, return empty list
+            if (!updatedEntities.Any()) return [];
+
             // Get existing entities from DB
             var existingEntities = await GetEntityRangeAsync(updatedEntities);
 
@@ -132,6 +141,9 @@ namespace Calibr8Fit.Api.Repository
 
         public virtual async Task<List<T>> DeleteRangeAsync(IEnumerable<TKey> keys)
         {
+            // If no keys provided, return empty list
+            if (!keys.Any()) return [];
+
             // Get existing entities from DB
             var existingEntities = await GetRangeAsync(keys);
 
@@ -154,6 +166,7 @@ namespace Calibr8Fit.Api.Repository
                 .Select(e => e.Id)
                 .ToListAsync();
         }
+
         protected virtual async Task<T?> GetEntityAsync(T entity)
         {
             // Get entity by id

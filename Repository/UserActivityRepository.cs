@@ -14,7 +14,6 @@ namespace Calibr8Fit.Api.Repository
             return _dbSet
                 .Where(ua => ua.UserId == userId)
                 .Select(ua => ua.SyncedAt)
-                .DefaultIfEmpty(DateTime.MinValue)
                 .MaxAsync();
         }
         public async Task<List<UserActivity>> GetAllFromDateByUserIdAsync(DateTime fromDate, string userId)
