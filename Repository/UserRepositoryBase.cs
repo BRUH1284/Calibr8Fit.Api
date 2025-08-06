@@ -5,10 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Calibr8Fit.Api.Repository
 {
-    public abstract class UserRepositoryBase<T>(
+    public abstract class UserRepositoryBase<T, HT, TKey>(
         ApplicationDbContext context
-        ) : RepositoryBase<T>(context), IUserRepositoryBase<T>
-        where T : class, IUserEntity
+        ) : RepositoryBase<T, HT, TKey>(context), IUserRepositoryBase<T, TKey>
+        where T : class, IUserEntity<TKey>
+        where HT : class, IEntity<TKey>
+        where TKey : notnull
     {
         public async Task<List<T>> GetAllByUserIdAsync(string userId)
         {
@@ -17,18 +19,19 @@ namespace Calibr8Fit.Api.Repository
                 .ToListAsync();
         }
 
-        public async Task<T?> GetByUserIdAndKeyAsync(string userId, params object[] key)
+        public async Task<T?> GetByUserIdAndKeyAsync(string userId, TKey key)
         {
             // Get entity by userId and key
             return await _dbSet
                 .FirstOrDefaultAsync(e => e.UserId.Equals(userId) && e.Id.Equals(key));
         }
 
-        public async Task<List<T>> GetRangeByUserIdAsync(string userId, IEnumerable<object[]> keys)
+        public async Task<List<T>> GetRangeByUserIdAsync(string userId, IEnumerable<TKey> keys)
         {
+            var keySet = keys.ToHashSet();
             // Get range of entities by userId and keys
             return await _dbSet
-                .Where(e => e.UserId.Equals(userId) && keys.Contains(e.Id))
+                .Where(e => e.UserId.Equals(userId) && keySet.Contains(e.Id))
                 .ToListAsync();
         }
 
@@ -72,7 +75,7 @@ namespace Calibr8Fit.Api.Repository
             return await RemoveEntityRangeAsync(existing);
         }
 
-        public async Task<T?> DeleteByUserIdAndIdAsync(string userId, params object[] key)
+        public async Task<T?> DeleteByUserIdAndIdAsync(string userId, TKey key)
         {
             // Get existing entity by userId and key
             var existing = await GetByUserIdAndKeyAsync(userId, key);
@@ -81,7 +84,7 @@ namespace Calibr8Fit.Api.Repository
             return await RemoveEntityAsync(existing);
         }
 
-        public async Task<List<T>> DeleteRangeByUserIdAndKeyAsync(string userId, IEnumerable<object[]> keys)
+        public async Task<List<T>> DeleteRangeByUserIdAndKeyAsync(string userId, IEnumerable<TKey> keys)
         {
             // Get existing entities by userId and keys
             var existingEntities = await GetRangeByUserIdAsync(userId, keys);
@@ -98,5 +101,14 @@ namespace Calibr8Fit.Api.Repository
             // Ensure UserId is not modified during update
             _dbSet.Entry(existingEntity).Property(e => e.UserId).IsModified = false;
         }
+    }
+
+    public abstract class UserRepositoryBase<T, TKey>(
+        ApplicationDbContext context
+        ) : UserRepositoryBase<T, T, TKey>(context)
+        where T : class, IUserEntity<TKey>
+        where TKey : notnull
+    {
+
     }
 }

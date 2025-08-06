@@ -8,7 +8,7 @@ namespace Calibr8Fit.Api.Repository
     public class ActivityRepository(
         IDataVersionRepository dataVersionRepository,
         ApplicationDbContext context
-        ) : RepositoryBase<Activity>(context), IActivityRepository
+        ) : RepositoryBase<Activity, Guid>(context), IActivityRepository
     {
         private static readonly DataResource DataResource = DataResource.Activities;
         IDataVersionRepository IDataVersionProvider.DataVersionRepository => dataVersionRepository;

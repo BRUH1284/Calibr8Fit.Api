@@ -1,7 +1,7 @@
 namespace Calibr8Fit.Api.Interfaces.Model
 {
-    public interface IEntity
+    public interface IEntity<TKey>
     {
-        object[] Id { get; }
+        TKey Id { get; }
     }
 }

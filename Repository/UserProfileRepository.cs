@@ -6,7 +6,7 @@ namespace Calibr8Fit.Api.Repository
 {
     public class UserProfileRepository(
             ApplicationDbContext context
-        ) : RepositoryBase<UserProfile>(context), IUserProfileRepository
+        ) : RepositoryBase<UserProfile, string>(context), IUserProfileRepository
     {
 
     }

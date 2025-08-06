@@ -61,7 +61,7 @@ namespace Calibr8Fit.Api.Controllers
                 ? BadRequest("Failed to add activity.")
                 : CreatedAtAction(nameof(GetActivityById), new { id = activity.Id }, activity.ToActivityDto());
         }
-        [HttpPut("{id}")]
+        [HttpPut]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateActivity([FromBody] UpdateActivityRequestDto updateDto)
         {
@@ -170,7 +170,7 @@ namespace Calibr8Fit.Api.Controllers
             if (user is null) return Unauthorized("User not found.");
 
             // Delete user activities
-            var deletedActivities = await _userActivityRepository.DeleteRangeByUserIdAndKeyAsync(user.Id, (IEnumerable<object[]>)deleteDtos.Select(dto => dto.Id));
+            var deletedActivities = await _userActivityRepository.DeleteRangeByUserIdAndKeyAsync(user.Id, deleteDtos.Select(dto => dto.Id));
 
             // If no activities were deleted, return NotFound
             return deletedActivities.Count == 0

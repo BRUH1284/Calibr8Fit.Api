@@ -1,36 +1,26 @@
 using Calibr8Fit.Api.Data;
 using Calibr8Fit.Api.Interfaces.Repository;
 using Calibr8Fit.Api.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Calibr8Fit.Api.Repository
 {
     public class RefreshTokenRepository(
         ApplicationDbContext context
-        ) : UserRepositoryBase<RefreshToken>(context), IRefreshTokenRepository
+        ) : UserRepositoryBase<RefreshToken, string[]>(context), IRefreshTokenRepository
     {
-        // Get by UserId and DeviceId
-        public async Task<RefreshToken?> GetByUserIdAndDeviceIdAsync(string userId, string deviceId)
+        public override async Task<RefreshToken?> GetAsync(string[] key)
         {
-            // Find the refresh token by UserId and DeviceId
-            return await _dbSet
-                .Where(rt => rt.UserId == userId && rt.DeviceId == deviceId)
-                .FirstOrDefaultAsync();
-        }
-        // Delete by ID
-        public async Task<RefreshToken?> DeleteByUserIdAndDeviceIdAsync(string userId, string deviceId)
-        {
-            // Find the refresh token by UserId and DeviceId
-            var refreshToken = await GetByUserIdAndDeviceIdAsync(userId, deviceId);
+            // Validate key length
+            if (key.Length != 2)
+                throw new ArgumentException("Key must contain exactly two elements: UserId and DeviceId.");
 
-            // Remove the refresh token if it exists
-            return await RemoveEntityAsync(refreshToken);
+            // Get the refresh token by UserId and DeviceId
+            return await _dbSet.FindAsync(key[0], key[1]);
         }
-
         protected override async Task<RefreshToken?> GetEntityAsync(RefreshToken entity)
         {
             // Get the refresh token by UserId and DeviceId
-            return await GetByUserIdAndDeviceIdAsync(entity.UserId, entity.DeviceId);
+            return await _dbSet.FindAsync(entity.UserId, entity.DeviceId);
         }
     }
 }

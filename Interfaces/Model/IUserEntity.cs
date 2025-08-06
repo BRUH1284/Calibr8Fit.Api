@@ -1,6 +1,6 @@
 namespace Calibr8Fit.Api.Interfaces.Model
 {
-    public interface IUserEntity : IEntity
+    public interface IUserEntity<TKey> : IEntity<TKey>
     {
         string UserId { get; }
     }

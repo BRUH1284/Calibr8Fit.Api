@@ -109,7 +109,7 @@ namespace Calibr8Fit.Api.Services
                 return Result<TokenDto>.Failure(["User not found."]);
 
             // Validate token
-            var storedToken = await _refreshTokenRepo.GetByUserIdAndDeviceIdAsync(user.Id, tokenRequestDto.DeviceId);
+            var storedToken = await _refreshTokenRepo.GetAsync([user.Id, tokenRequestDto.DeviceId]);
             if (storedToken is null || !_tokenService.VerifyRefreshToken(tokenRequestDto.RefreshToken, storedToken.TokenHash))
                 return Result<TokenDto>.Failure(["Invalid refresh token."]);
 
@@ -121,7 +121,7 @@ namespace Calibr8Fit.Api.Services
         private async Task<TokenDto> GetTokenDto(User user, IList<string> roles, string deviceId)
         {
             // Set token expiration time
-            var accessTokenExpirationTime = DateTime.Now.AddMinutes(30);
+            var accessTokenExpirationTime = DateTime.Now.AddDays(30);
             var refreshTokenExpirationTime = DateTime.Now.AddDays(30).ToUniversalTime();
 
             // Generate access token

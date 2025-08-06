@@ -4,7 +4,7 @@ namespace Calibr8Fit.Api.DataTransferObjects.Activity
 {
     public class AddUserActivityRequestDto
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } // Optional, will be generated if not provided
         [Required]
         public required string MajorHeading { get; set; }
         [Required]
