@@ -1,6 +1,7 @@
 using Calibr8Fit.Api.Data;
 using Calibr8Fit.Api.Interfaces.Repository;
 using Calibr8Fit.Api.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Calibr8Fit.Api.Repository
 {
@@ -21,6 +22,11 @@ namespace Calibr8Fit.Api.Repository
         {
             // Get the refresh token by UserId and DeviceId
             return await _dbSet.FindAsync(entity.UserId, entity.DeviceId);
+        }
+        protected override async Task<bool> KeyExistsInHierarchyAsync(string[] key)
+        {
+            // Check if the hierarchy key exists in the database
+            return await GetAsync(key) is not null;
         }
     }
 }

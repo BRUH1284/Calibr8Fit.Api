@@ -151,55 +151,55 @@ namespace Calibr8Fit.Api.Controllers
         }
         [HttpPost("my")]
         [Authorize]
-        public async Task<IActionResult> AddUserActivities([FromBody] List<AddUserActivityRequestDto> userActivityDtos)
+        public async Task<IActionResult> AddUserActivity([FromBody] AddUserActivityRequestDto userActivityDto)
         {
             // Find user in DB
             var user = await _currentUserService.GetCurrentUserAsync(User);
             if (user is null) return Unauthorized("User not found.");
 
             // Add new user activities to DB
-            var addedActivities = await _userActivityRepository
-                .AddRangeAsync(userActivityDtos.Select(dto => dto.ToUserActivity(user.Id)));
+            var addedActivity = await _userActivityRepository
+                .AddAsync(userActivityDto.ToUserActivity(user.Id));
 
             // If activity is null, return BadRequest
-            return addedActivities.Count == 0
+            return addedActivity is null
                 ? BadRequest("Failed to add user activities.")
                 : CreatedAtAction(
-                    nameof(GetUserActivities),
-                    new { userId = user.Id },
-                    addedActivities.Select(a => a.ToUserActivityDto()));
+                    nameof(GetActivityById),
+                    new { id = addedActivity.Id },
+                    addedActivity.ToUserActivityDto());
         }
         [HttpPut("my")]
         [Authorize]
-        public async Task<IActionResult> UpdateUserActivities([FromBody] List<UpdateUserActivityRequestDto> updateDtos)
+        public async Task<IActionResult> UpdateUserActivity([FromBody] UpdateUserActivityRequestDto updateDto)
         {
             // Find user in DB
             var user = await _currentUserService.GetCurrentUserAsync(User);
             if (user is null) return Unauthorized("User not found.");
 
             // Update user activities
-            var updatedActivities = await _userActivityRepository
-                .UpdateRangeByUserIdAsync(user.Id, updateDtos.Select(dto => dto.ToUserActivity(user.Id)));
+            var updatedActivity = await _userActivityRepository
+                .UpdateByUserIdAsync(user.Id, updateDto.ToUserActivity(user.Id));
 
             // If no activities were updated, return NotFound
-            return updatedActivities.Count == 0
+            return updatedActivity is null
                 ? NotFound("No matching user activities were updated.")
-                : Ok(updatedActivities.Select(a => a.ToUserActivityDto()));
+                : Ok(updatedActivity.ToUserActivityDto());
         }
         [HttpDelete("my")]
         [Authorize]
-        public async Task<IActionResult> DeleteUserActivities([FromBody] List<DeleteUserActivityRequestDto> deleteDtos)
+        public async Task<IActionResult> DeleteUserActivity([FromBody] DeleteUserActivityRequestDto deleteDto)
         {
             // Find user in DB
             var user = await _currentUserService.GetCurrentUserAsync(User);
             if (user is null) return Unauthorized("User not found.");
 
             // Delete user activities
-            var deletedActivities = await _userActivityRepository
-                .DeleteRangeByUserIdAndKeyAsync(user.Id, deleteDtos.Select(dto => dto.Id));
+            var deletedActivity = await _userActivityRepository
+                .DeleteByUserIdAndIdAsync(user.Id, deleteDto.Id);
 
             // If no activities were deleted, return NotFound
-            return deletedActivities.Count == 0
+            return deletedActivity is null
                 ? NotFound("No matching user activities were deleted.")
                 : NoContent();
         }

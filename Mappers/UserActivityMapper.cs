@@ -13,7 +13,6 @@ namespace Calibr8Fit.Api.Mappers
                 MajorHeading = userActivity.MajorHeading,
                 MetValue = userActivity.MetValue,
                 Description = userActivity.Description,
-                SyncedAt = userActivity.SyncedAt,
                 ModifiedAt = userActivity.ModifiedAt,
                 Deleted = userActivity.Deleted
             };

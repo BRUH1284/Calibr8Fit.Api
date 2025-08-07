@@ -5,7 +5,7 @@ namespace Calibr8Fit.Api.Models
 {
     public class UserProfile : IEntity<string>
     {
-        public required string UserId { get; set; }
+        public required string Id { get; set; }
         public string FirstName { get; set; } = "";
         public string LastName { get; set; } = "";
         public DateTime DateOfBirth { get; set; } = DateTime.MinValue;
@@ -15,7 +15,5 @@ namespace Calibr8Fit.Api.Models
         public float Height { get; set; } = 0.0f;
         public UserActivityLevel ActivityLevel { get; set; } = UserActivityLevel.Sedentary;
         public UserClimate Climate { get; set; } = UserClimate.Temperate;
-
-        string IEntity<string>.Id => UserId;
     }
 }

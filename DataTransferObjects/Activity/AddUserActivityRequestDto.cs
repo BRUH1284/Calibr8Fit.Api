@@ -11,8 +11,7 @@ namespace Calibr8Fit.Api.DataTransferObjects.Activity
         public required float MetValue { get; set; }
         [Required]
         public required string Description { get; set; }
-        [Required]
-        public required DateTime ModifiedAt { get; set; }
+        public DateTime ModifiedAt { get; set; } = DateTime.UtcNow; // Default to current time if not specified
         public bool Deleted { get; set; } = false; // Default to false if not specified
     }
 }

@@ -34,7 +34,7 @@ namespace Calibr8Fit.Api.Mappers
         {
             return new UserProfile
             {
-                UserId = user.Id,
+                Id = user.Id,
                 FirstName = dto.FirstName ?? user.Profile!.FirstName,
                 LastName = dto.LastName ?? user.Profile!.LastName,
                 DateOfBirth = dto.DateOfBirth ?? user.Profile!.DateOfBirth,

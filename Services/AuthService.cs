@@ -60,7 +60,7 @@ namespace Calibr8Fit.Api.Services
             // Create user profile
             var userProfile = new UserProfile
             {
-                UserId = user.Id
+                Id = user.Id
             };
 
             // Save user profile

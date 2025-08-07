@@ -14,7 +14,8 @@ namespace Calibr8Fit.Api.Repository
             return _dbSet
                 .Where(ua => ua.UserId == userId)
                 .Select(ua => ua.SyncedAt)
-                .MaxAsync();
+                .OrderByDescending(s => s)
+                .FirstOrDefaultAsync();
         }
         public async Task<List<UserActivity>> GetAllFromDateByUserIdAsync(DateTime fromDate, string userId)
         {

@@ -155,15 +155,15 @@ namespace Calibr8Fit.Api.Repository
         protected virtual async Task<bool> KeyExistsInHierarchyAsync(TKey key)
         {
             // Check if the hierarchy key exists in the database
-            return await _hDbSet.AnyAsync(e => e.Id.Equals(key));
+            return await _hDbSet.FindAsync(key) is not null;
         }
 
         protected virtual async Task<List<TKey>> KeyRangeExistsInHierarchyAsync(IEnumerable<TKey> keys)
         {
             // Check if any of the hierarchy keys exist in the database
             return await _hDbSet
-                .Where(e => keys.Contains(e.Id))
                 .Select(e => e.Id)
+                .Where(e => keys.Contains(e))
                 .ToListAsync();
         }
 

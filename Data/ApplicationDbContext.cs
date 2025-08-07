@@ -19,13 +19,13 @@ namespace Calibr8Fit.Api.Data
             base.OnModelCreating(builder);
 
             // Create roles
-            List<IdentityRole> roles = new List<IdentityRole>{
-                new IdentityRole{
+            var roles = new List<IdentityRole>{
+                new() {
                     Id = "Admin",
                     Name = "Admin",
                     NormalizedName = "ADMIN"
                 },
-                new IdentityRole{
+                new() {
                     Id = "User",
                     Name = "User",
                     NormalizedName = "USER"
@@ -39,12 +39,9 @@ namespace Calibr8Fit.Api.Data
 
             // Configure User Profile
             builder.Entity<UserProfile>()
-                .HasKey(up => up.UserId); // UserId is the primary key in UserProfile
-
-            builder.Entity<UserProfile>()
                 .HasOne<User>()
                 .WithOne(u => u.Profile) // User has one UserProfile
-                .HasForeignKey<UserProfile>(p => p.UserId)
+                .HasForeignKey<UserProfile>(p => p.Id)
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> UserProfile
 
             // Configure RefreshToken
