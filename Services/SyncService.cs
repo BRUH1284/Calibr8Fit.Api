@@ -5,17 +5,17 @@ using Calibr8Fit.Api.Interfaces.Service;
 namespace Calibr8Fit.Api.Services
 {
     public class SyncService<T, TKey>(
-        IUserSyncRepository<T, TKey> repository
+        IUserSyncRepositoryBase<T, TKey> repository
         ) : ISyncService<T, TKey>
         where T : class, ISyncableUserEntity<TKey>
         where TKey : notnull
     {
-        private readonly IUserSyncRepository<T, TKey> _repository = repository;
+        private readonly IUserSyncRepositoryBase<T, TKey> _repository = repository;
 
-        public async Task<DateTime> GetLastSyncedAtAsync(string userId)
+        public Task<DateTime> GetLastSyncedAtAsync(string userId)
         {
             // Return the last synced item date for the user
-            return await _repository.GetLastSyncedAtAsync(userId);
+            return _repository.GetLastSyncedAtAsync(userId);
         }
         public async Task<List<T>> Sync(string userId, IEnumerable<T> entities, DateTime lastSyncedAt)
         {

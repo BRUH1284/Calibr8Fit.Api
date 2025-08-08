@@ -1,4 +1,4 @@
-namespace Calibr8Fit.Api.DataTransferObjects.Activity
+namespace Calibr8Fit.Api.DataTransferObjects.UserActivity
 {
     public class UserActivityDto
     {

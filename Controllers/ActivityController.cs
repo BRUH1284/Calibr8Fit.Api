@@ -1,4 +1,5 @@
 using Calibr8Fit.Api.DataTransferObjects.Activity;
+using Calibr8Fit.Api.DataTransferObjects.UserActivity;
 using Calibr8Fit.Api.Interfaces.Repository;
 using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Mappers;
@@ -110,18 +111,18 @@ namespace Calibr8Fit.Api.Controllers
             var user = await _currentUserService.GetCurrentUserAsync(User);
             if (user is null) return Unauthorized("User not found.");
 
-            // get synced activities from request DTOs
+            // Get synced activities from request DTOs
             var result = await _syncService.Sync(
                 user.Id,
                 requestDto.UserActivities.Select(dto => dto.ToUserActivity(user.Id)),
                 requestDto.LastSyncedAt
             );
 
-            return Ok(result.Select(a => a.ToUserActivityDto()).ToList());
+            return Ok(result.ToSyncUserActivityResponseDto(DateTime.UtcNow));
         }
         [HttpGet("my")]
         [Authorize]
-        public async Task<IActionResult> GetUserActivities()
+        public async Task<IActionResult> GetAllUserActivities()
         {
             // Find user in DB
             var user = await _currentUserService.GetCurrentUserAsync(User);
@@ -163,7 +164,7 @@ namespace Calibr8Fit.Api.Controllers
 
             // If activity is null, return BadRequest
             return addedActivity is null
-                ? BadRequest("Failed to add user activities.")
+                ? BadRequest("Failed to add user activity.")
                 : CreatedAtAction(
                     nameof(GetActivityById),
                     new { id = addedActivity.Id },
@@ -181,9 +182,9 @@ namespace Calibr8Fit.Api.Controllers
             var updatedActivity = await _userActivityRepository
                 .UpdateByUserIdAsync(user.Id, updateDto.ToUserActivity(user.Id));
 
-            // If no activities were updated, return NotFound
+            // If activity is null, return NotFound
             return updatedActivity is null
-                ? NotFound("No matching user activities were updated.")
+                ? NotFound($"User activity with id: {updateDto.Id} not found.")
                 : Ok(updatedActivity.ToUserActivityDto());
         }
         [HttpDelete("my")]
@@ -200,7 +201,7 @@ namespace Calibr8Fit.Api.Controllers
 
             // If no activities were deleted, return NotFound
             return deletedActivity is null
-                ? NotFound("No matching user activities were deleted.")
+                ? NotFound($"User activity with id: {deleteDto.Id} not found.")
                 : NoContent();
         }
     }

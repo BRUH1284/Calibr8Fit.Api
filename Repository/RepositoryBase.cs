@@ -16,12 +16,12 @@ namespace Calibr8Fit.Api.Repository
         protected readonly DbSet<T> _dbSet = context.Set<T>();
         protected readonly DbSet<HT> _hDbSet = context.Set<HT>();
 
-        public virtual async Task<T?> GetAsync(TKey key)
+        public virtual ValueTask<T?> GetAsync(TKey key)
         {
             // Get entity by key
-            return await _dbSet.FindAsync(key);
+            return _dbSet.FindAsync(key);
         }
-        public virtual async Task<List<T>> GetRangeAsync(IEnumerable<TKey> keys)
+        public async ValueTask<List<T>> GetRangeAsync(IEnumerable<TKey> keys)
         {
             // If no keys provided, return empty list
             if (!keys.Any()) return [];
@@ -32,16 +32,16 @@ namespace Calibr8Fit.Api.Repository
                 .ToListAsync();
         }
 
-        public virtual async Task<List<T>> GetAllAsync()
+        public virtual Task<List<T>> GetAllAsync()
         {
             // Get all entities
-            return await _dbSet.ToListAsync();
+            return _dbSet.ToListAsync();
         }
 
-        public virtual async Task<bool> KeyExistsAsync(TKey key)
+        public virtual Task<bool> KeyExistsAsync(TKey key)
         {
             // Check if entity exists by key
-            return await _dbSet.AnyAsync(e => e.Id.Equals(key));
+            return _dbSet.AnyAsync(e => e.Id.Equals(key));
         }
         public virtual async Task<T?> AddAsync(T entity)
         {
@@ -150,33 +150,33 @@ namespace Calibr8Fit.Api.Repository
             // Remove range of entities
             return await RemoveEntityRangeAsync(existingEntities);
         }
-
-
-        protected virtual async Task<bool> KeyExistsInHierarchyAsync(TKey key)
+        public virtual async Task<bool> KeyExistsInHierarchyAsync(TKey key)
         {
             // Check if the hierarchy key exists in the database
             return await _hDbSet.FindAsync(key) is not null;
         }
 
-        protected virtual async Task<List<TKey>> KeyRangeExistsInHierarchyAsync(IEnumerable<TKey> keys)
+        public virtual Task<List<TKey>> KeyRangeExistsInHierarchyAsync(IEnumerable<TKey> keys)
         {
             // Check if any of the hierarchy keys exist in the database
-            return await _hDbSet
+            return _hDbSet
                 .Select(e => e.Id)
                 .Where(e => keys.Contains(e))
                 .ToListAsync();
         }
 
-        protected virtual async Task<T?> GetEntityAsync(T entity)
+
+
+        protected virtual ValueTask<T?> GetEntityAsync(T entity)
         {
             // Get entity by id
-            return await _dbSet.FindAsync(entity.Id);
+            return _dbSet.FindAsync(entity.Id);
         }
 
-        protected virtual async Task<List<T>> GetEntityRangeAsync(IEnumerable<T> entities)
+        protected virtual ValueTask<List<T>> GetEntityRangeAsync(IEnumerable<T> entities)
         {
             // Get range of entities
-            return await GetRangeAsync(entities.Select(e => e.Id));
+            return GetRangeAsync(entities.Select(e => e.Id));
         }
 
         protected virtual async Task<T?> RemoveEntityAsync(T? entity)

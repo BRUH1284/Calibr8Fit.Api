@@ -1,7 +1,6 @@
 using Calibr8Fit.Api.Data;
 using Calibr8Fit.Api.Interfaces.Repository;
 using Calibr8Fit.Api.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Calibr8Fit.Api.Repository
 {
@@ -9,21 +8,21 @@ namespace Calibr8Fit.Api.Repository
         ApplicationDbContext context
         ) : UserRepositoryBase<RefreshToken, string[]>(context), IRefreshTokenRepository
     {
-        public override async Task<RefreshToken?> GetAsync(string[] key)
+        public override ValueTask<RefreshToken?> GetAsync(string[] key)
         {
             // Validate key length
             if (key.Length != 2)
                 throw new ArgumentException("Key must contain exactly two elements: UserId and DeviceId.");
 
             // Get the refresh token by UserId and DeviceId
-            return await _dbSet.FindAsync(key[0], key[1]);
+            return _dbSet.FindAsync(key[0], key[1]);
         }
-        protected override async Task<RefreshToken?> GetEntityAsync(RefreshToken entity)
+        protected override ValueTask<RefreshToken?> GetEntityAsync(RefreshToken entity)
         {
             // Get the refresh token by UserId and DeviceId
-            return await _dbSet.FindAsync(entity.UserId, entity.DeviceId);
+            return _dbSet.FindAsync(entity.UserId, entity.DeviceId);
         }
-        protected override async Task<bool> KeyExistsInHierarchyAsync(string[] key)
+        public override async Task<bool> KeyExistsInHierarchyAsync(string[] key)
         {
             // Check if the hierarchy key exists in the database
             return await GetAsync(key) is not null;

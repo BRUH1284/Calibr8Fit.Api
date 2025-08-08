@@ -7,6 +7,8 @@ namespace Calibr8Fit.Api.Models
         public Guid Id { get; set; }
         public required string UserId { get; set; }
         public virtual User? User { get; set; }
+
+        public Guid ActivityId { get; set; }
         public virtual ActivityBase? Activity { get; set; }
 
         public required int Duration { get; set; } // Duration in seconds

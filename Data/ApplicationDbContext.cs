@@ -11,6 +11,7 @@ namespace Calibr8Fit.Api.Data
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<ActivityBase> BaseActivities { get; set; }
+        public DbSet<ActivityRecord> ActivityRecords { get; set; }
         public IQueryable<Activity> Activities => Set<ActivityBase>().OfType<Activity>();
         public IQueryable<UserActivity> UserActivities => Set<ActivityBase>().OfType<UserActivity>();
 
@@ -73,6 +74,20 @@ namespace Calibr8Fit.Api.Data
                 .WithMany(u => u.UserActivities) // User can have many UserActivities
                 .HasForeignKey(ua => ua.UserId)
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> UserActivity
+
+            // Configure ActivityRecord
+            builder.Entity<ActivityRecord>()
+                .HasOne(ar => ar.User)
+                .WithMany(u => u.ActivityRecords) // User can have many ActivityRecords
+                .HasForeignKey(ar => ar.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> ActivityRecord
+
+            // Configure ActivityRecord -> Activity relationship
+            builder.Entity<ActivityRecord>()
+                .HasOne(ar => ar.Activity)
+                .WithMany() // ActivityBase can have many ActivityRecords
+                .HasForeignKey(ar => ar.ActivityId)
+                .OnDelete(DeleteBehavior.Restrict); // Don't cascade delete Activity -> ActivityRecord
         }
     }
 }

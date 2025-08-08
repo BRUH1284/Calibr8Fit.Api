@@ -50,6 +50,8 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<ISyncService<UserActivity, Guid>, SyncService<UserActivity, Guid>>();
+builder.Services.AddScoped<ISyncService<ActivityRecord, Guid>, SyncService<ActivityRecord, Guid>>();
+builder.Services.AddScoped<IActivityValidationService, ActivityValidationService>();
 
 // Repositories
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
@@ -57,7 +59,9 @@ builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<IDataVersionRepository, DataVersionRepository>();
 builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
 builder.Services.AddScoped<IUserActivityRepository, UserActivityRepository>();
-builder.Services.AddScoped<IUserSyncRepository<UserActivity, Guid>, UserActivityRepository>();
+builder.Services.AddScoped<IUserSyncRepositoryBase<UserActivity, Guid>, UserActivityRepository>();
+builder.Services.AddScoped<IActivityRecordRepository, ActivityRecordRepository>();
+builder.Services.AddScoped<IUserSyncRepositoryBase<ActivityRecord, Guid>, ActivityRecordRepository>();
 
 
 

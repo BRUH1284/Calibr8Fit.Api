@@ -2,7 +2,7 @@ using Calibr8Fit.Api.Models;
 
 namespace Calibr8Fit.Api.Interfaces.Repository
 {
-    public interface IUserActivityRepository : IUserSyncRepository<UserActivity, Guid>
+    public interface IUserActivityRepository : IUserSyncRepositoryBase<UserActivity, Guid>
     {
 
     }

@@ -2,7 +2,7 @@ using Calibr8Fit.Api.Interfaces.Model;
 
 namespace Calibr8Fit.Api.Interfaces.Repository
 {
-    public interface IUserSyncRepository<T, TKey> : IUserRepositoryBase<T, TKey>
+    public interface IUserSyncRepositoryBase<T, TKey> : IUserRepositoryBase<T, TKey>
         where T : class, IUserEntity<TKey>
         where TKey : notnull
     {

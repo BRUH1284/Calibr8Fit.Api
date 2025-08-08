@@ -12,30 +12,35 @@ namespace Calibr8Fit.Api.Repository
         where HT : class, IEntity<TKey>
         where TKey : notnull
     {
-        public async Task<List<T>> GetAllByUserIdAsync(string userId)
+        public virtual Task<List<T>> GetAllByUserIdAsync(string userId)
         {
             // Get all entities by userId
-            return await _dbSet.Where(e => e.UserId.Equals(userId))
+            return _dbSet.Where(e => e.UserId.Equals(userId))
                 .ToListAsync();
         }
 
-        public async Task<T?> GetByUserIdAndKeyAsync(string userId, TKey key)
+        public virtual Task<T?> GetByUserIdAndKeyAsync(string userId, TKey key)
         {
             // Get entity by userId and key
-            return await _dbSet
+            return _dbSet
                 .FirstOrDefaultAsync(e => e.UserId.Equals(userId) && e.Id.Equals(key));
         }
 
-        public async Task<List<T>> GetRangeByUserIdAsync(string userId, IEnumerable<TKey> keys)
+        public virtual Task<List<T>> GetRangeByUserIdAsync(string userId, IEnumerable<TKey> keys)
         {
             var keySet = keys.ToHashSet();
             // Get range of entities by userId and keys
-            return await _dbSet
+            return _dbSet
                 .Where(e => e.UserId.Equals(userId) && keySet.Contains(e.Id))
                 .ToListAsync();
         }
+        public virtual Task<bool> UserKeyExistsAsync(string userId, TKey key)
+        {
+            // Check if entity exists by userId and key
+            return _dbSet.AnyAsync(e => e.Id.Equals(key) && e.UserId.Equals(userId));
+        }
 
-        public async Task<T?> UpdateByUserIdAsync(string userId, T entity)
+        public virtual async Task<T?> UpdateByUserIdAsync(string userId, T entity)
         {
             // Get existing entity by userId and id
             var existing = await GetByUserIdAndKeyAsync(userId, entity.Id);
@@ -51,7 +56,7 @@ namespace Calibr8Fit.Api.Repository
             return existing;
         }
 
-        public async Task<List<T>> UpdateRangeByUserIdAsync(string userId, IEnumerable<T> updatedEntities)
+        public virtual async Task<List<T>> UpdateRangeByUserIdAsync(string userId, IEnumerable<T> updatedEntities)
         {
             // Get existing entities by userId and ids
             var existingEntities = await GetRangeByUserIdAsync(userId, updatedEntities.Select(e => e.Id));
@@ -66,7 +71,7 @@ namespace Calibr8Fit.Api.Repository
             return existingEntities;
         }
 
-        public async Task<List<T>> DeleteAllByUserIdAsync(string userId)
+        public virtual async Task<List<T>> DeleteAllByUserIdAsync(string userId)
         {
             // Get existing entities by userId
             var existing = await GetAllByUserIdAsync(userId);
@@ -75,7 +80,7 @@ namespace Calibr8Fit.Api.Repository
             return await RemoveEntityRangeAsync(existing);
         }
 
-        public async Task<T?> DeleteByUserIdAndIdAsync(string userId, TKey key)
+        public virtual async Task<T?> DeleteByUserIdAndIdAsync(string userId, TKey key)
         {
             // Get existing entity by userId and key
             var existing = await GetByUserIdAndKeyAsync(userId, key);
@@ -84,7 +89,7 @@ namespace Calibr8Fit.Api.Repository
             return await RemoveEntityAsync(existing);
         }
 
-        public async Task<List<T>> DeleteRangeByUserIdAndKeyAsync(string userId, IEnumerable<TKey> keys)
+        public virtual async Task<List<T>> DeleteRangeByUserIdAndKeyAsync(string userId, IEnumerable<TKey> keys)
         {
             // Get existing entities by userId and keys
             var existingEntities = await GetRangeByUserIdAsync(userId, keys);

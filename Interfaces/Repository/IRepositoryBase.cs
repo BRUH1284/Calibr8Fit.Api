@@ -6,7 +6,8 @@ namespace Calibr8Fit.Api.Interfaces.Repository
         where T : class, IEntity<TKey>
         where TKey : notnull
     {
-        Task<T?> GetAsync(TKey key);
+        ValueTask<T?> GetAsync(TKey key);
+        ValueTask<List<T>> GetRangeAsync(IEnumerable<TKey> keys);
         Task<List<T>> GetAllAsync();
         Task<bool> KeyExistsAsync(TKey key);
         Task<T?> AddAsync(T entity);
@@ -16,5 +17,7 @@ namespace Calibr8Fit.Api.Interfaces.Repository
         Task<List<T>> UpdateRangeAsync(IEnumerable<T> entities);
         Task<T?> DeleteAsync(TKey key);
         Task<List<T>> DeleteRangeAsync(IEnumerable<TKey> keys);
+        Task<bool> KeyExistsInHierarchyAsync(TKey key);
+        Task<List<TKey>> KeyRangeExistsInHierarchyAsync(IEnumerable<TKey> keys);
     }
 }

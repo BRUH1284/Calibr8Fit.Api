@@ -1,15 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Calibr8Fit.Api.Data;
+using Calibr8Fit.Api.Interfaces.Repository;
+using Calibr8Fit.Api.Models;
 
 namespace Calibr8Fit.Api.Repository
 {
-    // public class ActivityRecordRepository(
-    //     ApplicationDbContext context
-    // ) : RepositoryBase(context)
-    // {
+    public class ActivityRecordRepository(
+        ApplicationDbContext context
+    ) : UserSyncRepositoryBase<ActivityRecord, Guid>(context), IActivityRecordRepository
+    {
 
-    // }
+    }
 }

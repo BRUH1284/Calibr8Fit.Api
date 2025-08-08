@@ -8,6 +8,7 @@ namespace Calibr8Fit.Api.Interfaces.Repository
     {
         Task<T?> GetByUserIdAndKeyAsync(string userId, TKey key);
         Task<List<T>> GetAllByUserIdAsync(string userId);
+        Task<bool> UserKeyExistsAsync(string userId, TKey key);
         Task<T?> UpdateByUserIdAsync(string userId, T entity);
         Task<List<T>> UpdateRangeByUserIdAsync(string userId, IEnumerable<T> entities);
         Task<List<T>> DeleteAllByUserIdAsync(string userId);

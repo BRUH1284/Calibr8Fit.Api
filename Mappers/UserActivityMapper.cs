@@ -1,4 +1,4 @@
-using Calibr8Fit.Api.DataTransferObjects.Activity;
+using Calibr8Fit.Api.DataTransferObjects.UserActivity;
 using Calibr8Fit.Api.Models;
 
 namespace Calibr8Fit.Api.Mappers
@@ -54,6 +54,17 @@ namespace Calibr8Fit.Api.Mappers
                 Description = requestDto.Description,
                 ModifiedAt = requestDto.ModifiedAt,
                 Deleted = requestDto.Deleted
+            };
+        }
+        public static SyncUserActivityResponseDto ToSyncUserActivityResponseDto(
+            this IEnumerable<UserActivity> userActivities,
+            DateTime syncedAt
+            )
+        {
+            return new SyncUserActivityResponseDto
+            {
+                SyncedAt = syncedAt,
+                UserActivities = userActivities.Select(ua => ua.ToUserActivityDto()).ToList()
             };
         }
     }
