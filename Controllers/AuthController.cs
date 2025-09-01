@@ -4,6 +4,7 @@ using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Interfaces.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Calibr8Fit.Api.Controllers.Abstract;
 namespace Calibr8Fit.Api.Controllers
 {
     [Route("api/auth")]
@@ -12,11 +13,10 @@ namespace Calibr8Fit.Api.Controllers
         IRefreshTokenRepository refreshTokenRepo,
         IAuthService authService,
         ICurrentUserService currentUserService
-        ) : ControllerBase
+        ) : AppControllerBase(currentUserService)
     {
         private readonly IRefreshTokenRepository _refreshTokenRepo = refreshTokenRepo;
         private readonly IAuthService _authService = authService;
-        private readonly ICurrentUserService _currentUserService = currentUserService;
 
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync([FromBody] RegisterDto registerDto)
@@ -47,29 +47,23 @@ namespace Calibr8Fit.Api.Controllers
         }
         [HttpPost("logout")]
         [Authorize]
-        public async Task<IActionResult> Logout([FromQuery] string deviceId)
-        {
-            // Find user in DB
-            var user = await _currentUserService.GetCurrentUserAsync(User);
-            if (user is null) return Unauthorized("User not found.");
-
-            // Delete refresh token for user and device
-            return await _refreshTokenRepo.DeleteAsync([user.Id, deviceId]) is null
-                ? NotFound("Refresh token not found for this user and device.")
-                : NoContent();
-        }
+        public Task<IActionResult> Logout([FromQuery] string deviceId) =>
+            WithUser(async user =>
+            {
+                // Delete refresh token for user and device
+                return await _refreshTokenRepo.DeleteAsync([user.Id, deviceId]) is null
+                    ? NotFound("Refresh token not found for this user and device.")
+                    : NoContent();
+            });
         [HttpPost("logout-all")]
         [Authorize]
-        public async Task<IActionResult> LogoutAll()
-        {
-            // Find user in DB
-            var user = await _currentUserService.GetCurrentUserAsync(User);
-            if (user is null) return Unauthorized("User not found.");
-
-            // Delete all refresh tokens for user
-            return await _refreshTokenRepo.DeleteAllByUserIdAsync(user.Id) is null
-                ? NotFound("No refresh tokens found for this user.")
-                : NoContent();
-        }
+        public Task<IActionResult> LogoutAll() =>
+            WithUser(async user =>
+            {
+                // Delete all refresh tokens for user
+                return await _refreshTokenRepo.DeleteAllByUserIdAsync(user.Id) is null
+                    ? NotFound("No refresh tokens found for this user.")
+                    : NoContent();
+            });
     }
 }

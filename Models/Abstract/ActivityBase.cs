@@ -1,6 +1,6 @@
 using Calibr8Fit.Api.Interfaces.Model;
 
-namespace Calibr8Fit.Api.Models
+namespace Calibr8Fit.Api.Models.Abstract
 {
     public abstract class ActivityBase : IEntity<Guid>
     {

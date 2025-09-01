@@ -1,4 +1,5 @@
 using Calibr8Fit.Api.Models;
+using Calibr8Fit.Api.Models.Abstract;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

@@ -63,7 +63,7 @@ namespace Calibr8Fit.Api.Mappers
         {
             return new SyncUserActivityResponseDto
             {
-                SyncedAt = syncedAt,
+                LastSyncedAt = syncedAt,
                 UserActivities = userActivities.Select(ua => ua.ToUserActivityDto()).ToList()
             };
         }

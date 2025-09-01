@@ -1,4 +1,5 @@
 using Calibr8Fit.Api.Interfaces.Model;
+using Calibr8Fit.Api.Models.Abstract;
 
 namespace Calibr8Fit.Api.Models
 {

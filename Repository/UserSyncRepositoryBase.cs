@@ -12,7 +12,7 @@ namespace Calibr8Fit.Api.Repository
         where HT : class, IEntity<TKey>
         where TKey : notnull
     {
-        public Task<DateTime> GetLastSyncedAtAsync(string userId)
+        public virtual Task<DateTime> GetLastSyncedAtAsync(string userId)
         {
             return _dbSet
                 .Where(ua => ua.UserId == userId)
@@ -20,12 +20,45 @@ namespace Calibr8Fit.Api.Repository
                 .OrderByDescending(s => s)
                 .FirstOrDefaultAsync();
         }
-        public Task<List<T>> GetAllFromDateByUserIdAsync(DateTime fromDate, string userId)
+        public virtual Task<List<T>> GetAllFromDateByUserIdAsync(DateTime fromDate, string userId)
         {
             // Get all user activities for a specific user that have been synced after a certain date
             return _dbSet
                 .Where(ua => ua.UserId == userId && ua.SyncedAt > fromDate)
                 .ToListAsync();
+        }
+        public virtual async Task<T?> MarkAsDeletedByUserIdAsync(string userId, TKey key)
+        {
+            var existing = await _dbSet
+                .FirstOrDefaultAsync(e => e.UserId == userId && e.Id.Equals(key) && !e.Deleted);
+
+            // If entity does not exist, return null
+            if (existing is null) return null;
+
+            // Mark entity as deleted
+            existing.Deleted = true;
+
+            // Save changes in DB
+            await SaveChangesAsync();
+            return existing;
+        }
+        public virtual async Task<List<T>> MarkRangeAsDeletedByUserIdAsync(string userId, IEnumerable<TKey> keys)
+        {
+            var keySet = keys.ToHashSet();
+            var entities = await _dbSet
+                .Where(e => e.UserId == userId && keySet.Contains(e.Id) && !e.Deleted)
+                .ToListAsync();
+
+            // If no entities found, return empty list
+            if (!entities.Any()) return [];
+
+            // Mark entities as deleted
+            foreach (var entity in entities)
+                entity.Deleted = true;
+
+            // Save changes in DB
+            await SaveChangesAsync();
+            return entities;
         }
     }
 
