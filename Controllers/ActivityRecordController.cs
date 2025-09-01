@@ -39,7 +39,7 @@ namespace Calibr8Fit.Api.Controllers
         private readonly IActivityValidationService _activityValidationService = activityValidationService;
 
         [HttpPost("sync")]
-        public Task<IActionResult> Sync([FromBody] SyncActivityRecordRequestDto requestDto) =>
+        public override Task<IActionResult> Sync([FromBody] SyncActivityRecordRequestDto requestDto) =>
             WithUser(async user =>
             {
                 // Validate activity record links

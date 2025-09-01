@@ -13,6 +13,7 @@ namespace Calibr8Fit.Api.Data
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<ActivityBase> BaseActivities { get; set; }
         public DbSet<ActivityRecord> ActivityRecords { get; set; }
+        public DbSet<WaterIntakeRecord> WaterIntakeRecords { get; set; }
         public IQueryable<Activity> Activities => Set<ActivityBase>().OfType<Activity>();
         public IQueryable<UserActivity> UserActivities => Set<ActivityBase>().OfType<UserActivity>();
 
@@ -89,6 +90,13 @@ namespace Calibr8Fit.Api.Data
                 .WithMany() // ActivityBase can have many ActivityRecords
                 .HasForeignKey(ar => ar.ActivityId)
                 .OnDelete(DeleteBehavior.Restrict); // Don't cascade delete Activity -> ActivityRecord
+
+            // Configure WaterIntakeRecord
+            builder.Entity<WaterIntakeRecord>()
+                .HasOne(wir => wir.User)
+                .WithMany(u => u.WaterIntakeRecords) // User can have many WaterIntakeRecords
+                .HasForeignKey(wir => wir.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> WaterIntakeRecord
         }
     }
 }
