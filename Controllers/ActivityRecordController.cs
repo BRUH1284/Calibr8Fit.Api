@@ -29,19 +29,14 @@ namespace Calibr8Fit.Api.Controllers
         >(
         currentUserService,
         activityRecordRepository,
-        syncService
+        syncService,
+        ActivityRecordMapper.ToActivityRecordDto,
+        ActivityRecordMapper.ToActivityRecord,
+        ActivityRecordMapper.ToActivityRecord,
+        ActivityRecordMapper.ToSyncActivityRecordResponseDto
         )
     {
         private readonly IActivityValidationService _activityValidationService = activityValidationService;
-
-        protected override ActivityRecordDto ToDto(ActivityRecord entity) => entity.ToActivityRecordDto();
-        protected override ActivityRecord ToEntity(UpdateActivityRecordRequestDto updateDto, string userId) =>
-            updateDto.ToActivityRecord(userId);
-        protected override ActivityRecord ToEntity(AddActivityRecordRequestDto addDto, string userId) =>
-            addDto.ToActivityRecord(userId);
-
-        protected override SyncActivityRecordResponseDto ToSyncResponseDto(DateTime lastSyncedAt, List<ActivityRecord> entities) =>
-           entities.ToSyncActivityRecordResponseDto(lastSyncedAt);
 
         [HttpPost("sync")]
         public Task<IActionResult> Sync([FromBody] SyncActivityRecordRequestDto requestDto) =>
