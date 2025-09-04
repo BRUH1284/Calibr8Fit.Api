@@ -1,0 +1,38 @@
+using Calibr8Fit.Api.Controllers.Abstract;
+using Calibr8Fit.Api.DataTransferObjects.WeightRecord;
+using Calibr8Fit.Api.Interfaces.Repository;
+using Calibr8Fit.Api.Interfaces.Service;
+using Calibr8Fit.Api.Mappers;
+using Calibr8Fit.Api.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Calibr8Fit.Api.Controllers
+{
+    [Route("api/weight")]
+    [ApiController]
+    [Authorize]
+    public class WeightController(
+        IWeightRecordRepository weightRecordRepository,
+        ICurrentUserService currentUserService,
+        ISyncService<WeightRecord, Guid> syncService
+        ) : SyncableEntityControllerBase<
+        WeightRecord,
+        WeightRecordDto,
+        Guid,
+        IWeightRecordRepository,
+        UpdateWeightRecordRequestDto,
+        AddWeightRecordRequestDto,
+        SyncWeightRecordRequestDto,
+        SyncWeightRecordResponseDto
+        >(
+            currentUserService,
+            weightRecordRepository,
+            syncService,
+            WeightRecordMapper.ToWeightRecordDto,
+            WeightRecordMapper.ToWeightRecord,
+            WeightRecordMapper.ToWeightRecord,
+            WeightRecordMapper.ToSyncWeightRecordResponseDto
+        )
+    { }
+}

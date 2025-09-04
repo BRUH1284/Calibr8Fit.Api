@@ -53,6 +53,7 @@ builder.Services.AddScoped<ISyncService<UserActivity, Guid>, SyncService<UserAct
 builder.Services.AddScoped<ISyncService<ActivityRecord, Guid>, SyncService<ActivityRecord, Guid>>();
 builder.Services.AddScoped<IActivityValidationService, ActivityValidationService>();
 builder.Services.AddScoped<ISyncService<WaterIntakeRecord, Guid>, SyncService<WaterIntakeRecord, Guid>>();
+builder.Services.AddScoped<ISyncService<WeightRecord, Guid>, SyncService<WeightRecord, Guid>>();
 
 // Repositories
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
@@ -65,6 +66,8 @@ builder.Services.AddScoped<IActivityRecordRepository, ActivityRecordRepository>(
 builder.Services.AddScoped<IUserSyncRepositoryBase<ActivityRecord, Guid>, ActivityRecordRepository>();
 builder.Services.AddScoped<IWaterIntakeRecordRepository, WaterIntakeRecordRepository>();
 builder.Services.AddScoped<IUserSyncRepositoryBase<WaterIntakeRecord, Guid>, WaterIntakeRecordRepository>();
+builder.Services.AddScoped<IWeightRecordRepository, WeightRecordRepository>();
+builder.Services.AddScoped<IUserSyncRepositoryBase<WeightRecord, Guid>, WeightRecordRepository>();
 
 
 

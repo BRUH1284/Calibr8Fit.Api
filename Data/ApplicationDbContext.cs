@@ -14,6 +14,7 @@ namespace Calibr8Fit.Api.Data
         public DbSet<ActivityBase> BaseActivities { get; set; }
         public DbSet<ActivityRecord> ActivityRecords { get; set; }
         public DbSet<WaterIntakeRecord> WaterIntakeRecords { get; set; }
+        public DbSet<WeightRecord> WeightRecords { get; set; }
         public IQueryable<Activity> Activities => Set<ActivityBase>().OfType<Activity>();
         public IQueryable<UserActivity> UserActivities => Set<ActivityBase>().OfType<UserActivity>();
 
@@ -97,6 +98,13 @@ namespace Calibr8Fit.Api.Data
                 .WithMany(u => u.WaterIntakeRecords) // User can have many WaterIntakeRecords
                 .HasForeignKey(wir => wir.UserId)
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> WaterIntakeRecord
+
+            // Configure WeightRecord
+            builder.Entity<WeightRecord>()
+                .HasOne(wr => wr.User)
+                .WithMany(u => u.WeightRecords) // User can have many WeightRecords
+                .HasForeignKey(wr => wr.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> WeightRecord
         }
     }
 }

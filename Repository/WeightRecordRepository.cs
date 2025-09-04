@@ -1,0 +1,13 @@
+using Calibr8Fit.Api.Data;
+using Calibr8Fit.Api.Interfaces.Repository;
+using Calibr8Fit.Api.Models;
+
+namespace Calibr8Fit.Api.Repository
+{
+    public class WeightRecordRepository(
+        ApplicationDbContext context
+    ) : UserSyncRepositoryBase<WeightRecord, Guid>(context), IWeightRecordRepository
+    {
+
+    }
+}
