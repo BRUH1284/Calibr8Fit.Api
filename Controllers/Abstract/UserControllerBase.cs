@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Calibr8Fit.Api.Controllers.Abstract
 {
-    public abstract class AppControllerBase(
+    public abstract class UserControllerBase(
         ICurrentUserService currentUserService
     ) : ControllerBase
     {

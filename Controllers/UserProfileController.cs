@@ -13,7 +13,7 @@ namespace Calibr8Fit.Api.Controllers
     public class UserProfileController(
         ICurrentUserService currentUserService,
         IUserProfileRepository userProfileRepository
-        ) : AppControllerBase(currentUserService)
+        ) : UserControllerBase(currentUserService)
     {
         private readonly IUserProfileRepository _userProfileRepository = userProfileRepository;
 

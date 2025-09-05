@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using Calibr8Fit.Api.Interfaces.DataTransferObjects;
 
 namespace Calibr8Fit.Api.DataTransferObjects.WeightRecord
 {
-    public class UpdateWeightRecordRequestDto
+    public class UpdateWeightRecordRequestDto : IUpdateRequestDto<Guid>
     {
         [Required]
         public required Guid Id { get; set; }

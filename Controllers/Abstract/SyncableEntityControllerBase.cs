@@ -22,14 +22,15 @@ namespace Calibr8Fit.Api.Controllers.Abstract
         ICurrentUserService currentUserService,
         TRepository repository,
         ISyncService<TEntity, TKey> syncService,
-        Func<TEntity, TDto> entityToDto,
-        Func<TUpdateDto, string, TEntity> updateDtoToEntity,
-        Func<TAddDto, string, TEntity> addDtoToEntity,
+        Func<TEntity, TDto> entityToDtoFunc,
+        Func<TUpdateDto, string, TEntity> updateDtoToEntityFunc,
+        Func<TAddDto, string, TEntity> addDtoToEntityFunc,
         Func<List<TEntity>, DateTime, TSyncResponseDto> toSyncResponseDtoFunc
-    ) : AppControllerBase(currentUserService)
+    ) : UserControllerBase(currentUserService)
         where TEntity : class, ISyncableUserEntity<TKey>
         where TKey : notnull
         where TRepository : IUserSyncRepositoryBase<TEntity, TKey>
+        where TUpdateDto : IUpdateRequestDto<TKey>
         where TSyncRequestDto : ISyncRequestDto<TAddDto>
         where TSyncResponseDto : ISyncResponseDto<TDto>
     {
@@ -46,9 +47,9 @@ namespace Calibr8Fit.Api.Controllers.Abstract
             {
                 // Get all entities for the user
                 var entities = await _repository.GetAllByUserIdAsync(userId);
-                var entitiesDtos = entities.Select(entityToDto);
+                var entityDtos = entities.Select(entityToDtoFunc);
 
-                return Ok(entitiesDtos);
+                return Ok(entityDtos);
             });
 
         [HttpGet("{id}")]
@@ -61,7 +62,7 @@ namespace Calibr8Fit.Api.Controllers.Abstract
                 // If entity is null, return NotFound
                 return entity is null
                     ? NotFound($"Entity with id: {id} not found.")
-                    : Ok(entityToDto(entity));
+                    : Ok(entityToDtoFunc(entity));
             });
 
         [HttpPost]
@@ -71,7 +72,7 @@ namespace Calibr8Fit.Api.Controllers.Abstract
         {
             // Add new entity to DB
             var addedEntity = await _repository
-                .AddAsync(addDtoToEntity(requestDto, userId));
+                .AddAsync(addDtoToEntityFunc(requestDto, userId));
 
             // If record is null, return BadRequest
             return addedEntity is null
@@ -79,22 +80,22 @@ namespace Calibr8Fit.Api.Controllers.Abstract
                 : CreatedAtAction(
                     nameof(GetById),
                     new { id = addedEntity.Id },
-                    entityToDto(addedEntity)
+                    entityToDtoFunc(addedEntity)
                 );
         });
 
         [HttpPut("{id}")]
-        public virtual Task<IActionResult> Update(Guid id, [FromBody] TUpdateDto requestDto) =>
+        public virtual Task<IActionResult> Update([FromBody] TUpdateDto requestDto) =>
         WithUserId(async userId =>
         {
             // Update existing entity
             var updatedEntity = await _repository
-                .UpdateByUserIdAsync(userId, updateDtoToEntity(requestDto, userId));
+                .UpdateByUserIdAsync(userId, updateDtoToEntityFunc(requestDto, userId));
 
             // If record is null, return NotFound
             return updatedEntity is null
-                ? NotFound($"Entity with id: {id} not found.")
-                : Ok(entityToDto(updatedEntity));
+                ? NotFound($"Entity with id: {requestDto.Id} not found.")
+                : Ok(entityToDtoFunc(updatedEntity));
         });
 
         [HttpDelete("{id}")]
@@ -118,7 +119,7 @@ namespace Calibr8Fit.Api.Controllers.Abstract
             // Get synced entities from request DTOs
             var result = await _syncService.Sync(
                 userId,
-                requestDto.AddEntityRequestDtos.Select(e => addDtoToEntity(e, userId)),
+                requestDto.AddEntityRequestDtos.Select(e => addDtoToEntityFunc(e, userId)),
                 requestDto.LastSyncedAt
             );
 

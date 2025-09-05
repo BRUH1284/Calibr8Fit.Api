@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using Calibr8Fit.Api.Interfaces.DataTransferObjects;
 
 namespace Calibr8Fit.Api.DataTransferObjects.UserActivity
 {
-    public class UpdateUserActivityRequestDto
+    public class UpdateUserActivityRequestDto : IUpdateRequestDto<Guid>
     {
         [Required]
         public required Guid Id { get; set; }

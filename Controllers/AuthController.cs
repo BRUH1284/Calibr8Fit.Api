@@ -13,7 +13,7 @@ namespace Calibr8Fit.Api.Controllers
         IRefreshTokenRepository refreshTokenRepo,
         IAuthService authService,
         ICurrentUserService currentUserService
-        ) : AppControllerBase(currentUserService)
+        ) : UserControllerBase(currentUserService)
     {
         private readonly IRefreshTokenRepository _refreshTokenRepo = refreshTokenRepo;
         private readonly IAuthService _authService = authService;
