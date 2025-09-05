@@ -1,14 +1,10 @@
-namespace Calibr8Fit.Api.DataTransferObjects.Food
+namespace Calibr8Fit.Api.DataTransferObjects.UserFood
 {
-    public class FoodDto
+    public class UserFoodDto
     {
         public required Guid Id { get; set; }
         public required string Name { get; set; }
-
-        // Basic Nutritional Information (per 100g)
         public required float CaloricValue { get; set; }
-
-        // Macronutrients (in grams per 100g)
         public required float Fat { get; set; }
         public required float SaturatedFats { get; set; }
         public required float MonounsaturatedFats { get; set; }
@@ -18,12 +14,8 @@ namespace Calibr8Fit.Api.DataTransferObjects.Food
         public required float Protein { get; set; }
         public required float DietaryFiber { get; set; }
         public required float Water { get; set; }
-
-        // Other Important Nutrients
         public required float Cholesterol { get; set; }
         public required float Sodium { get; set; }
-
-        // Vitamins
         public required float VitaminA { get; set; }
         public required float VitaminB1Thiamine { get; set; }
         public required float VitaminB11FolicAcid { get; set; }
@@ -36,8 +28,6 @@ namespace Calibr8Fit.Api.DataTransferObjects.Food
         public required float VitaminD { get; set; }
         public required float VitaminE { get; set; }
         public required float VitaminK { get; set; }
-
-        // Minerals
         public required float Calcium { get; set; }
         public required float Copper { get; set; }
         public required float Iron { get; set; }
@@ -47,8 +37,8 @@ namespace Calibr8Fit.Api.DataTransferObjects.Food
         public required float Potassium { get; set; }
         public required float Selenium { get; set; }
         public required float Zinc { get; set; }
-
-        // Nutritional Quality Metric
         public required float NutritionDensity { get; set; }
+        public required DateTime ModifiedAt { get; set; }
+        public required bool Deleted { get; set; }
     }
 }

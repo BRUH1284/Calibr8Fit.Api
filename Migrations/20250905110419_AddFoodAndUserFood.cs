@@ -1,22 +1,21 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Calibr8Fit.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class AddFood : Migration
+    public partial class AddFoodAndUserFood : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "foods",
+                name: "food_base",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuid_generate_v4()"),
                     name = table.Column<string>(type: "text", nullable: false),
                     caloric_value = table.Column<float>(type: "real", nullable: false),
                     fat = table.Column<float>(type: "real", nullable: false),
@@ -51,19 +50,35 @@ namespace Calibr8Fit.Api.Migrations
                     potassium = table.Column<float>(type: "real", nullable: false),
                     selenium = table.Column<float>(type: "real", nullable: false),
                     zinc = table.Column<float>(type: "real", nullable: false),
-                    nutrition_density = table.Column<float>(type: "real", nullable: false)
+                    nutrition_density = table.Column<float>(type: "real", nullable: false),
+                    is_user_food = table.Column<bool>(type: "boolean", nullable: false),
+                    user_id = table.Column<string>(type: "text", nullable: true),
+                    synced_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    modified_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    deleted = table.Column<bool>(type: "boolean", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_foods", x => x.id);
+                    table.PrimaryKey("pk_food_base", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_food_base_asp_net_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_food_base_user_id_id",
+                table: "food_base",
+                columns: new[] { "user_id", "id" });
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "foods");
+                name: "food_base");
         }
     }
 }

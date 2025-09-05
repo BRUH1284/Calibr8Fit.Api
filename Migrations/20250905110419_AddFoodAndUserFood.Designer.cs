@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Calibr8Fit.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250905094017_AddFood")]
-    partial class AddFood
+    [Migration("20250905110419_AddFoodAndUserFood")]
+    partial class AddFoodAndUserFood
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -64,82 +64,13 @@ namespace Calibr8Fit.Api.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("Calibr8Fit.Api.Models.ActivityRecord", b =>
+            modelBuilder.Entity("Calibr8Fit.Api.Models.Abstract.FoodBase", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("ActivityId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("activity_id");
-
-                    b.Property<float>("CaloriesBurned")
-                        .HasColumnType("real")
-                        .HasColumnName("calories_burned");
-
-                    b.Property<bool>("Deleted")
-                        .HasColumnType("boolean")
-                        .HasColumnName("deleted");
-
-                    b.Property<int>("Duration")
-                        .HasColumnType("integer")
-                        .HasColumnName("duration");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("modified_at");
-
-                    b.Property<DateTime>("SyncedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("synced_at");
-
-                    b.Property<DateTime>("Time")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("time");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_activity_records");
-
-                    b.HasIndex("ActivityId")
-                        .HasDatabaseName("ix_activity_records_activity_id");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_activity_records_user_id");
-
-                    b.ToTable("activity_records", (string)null);
-                });
-
-            modelBuilder.Entity("Calibr8Fit.Api.Models.DataVersion", b =>
-                {
-                    b.Property<int>("DataResource")
-                        .HasColumnType("integer")
-                        .HasColumnName("data_resource");
-
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_updated_at");
-
-                    b.HasKey("DataResource")
-                        .HasName("pk_data_versions");
-
-                    b.ToTable("data_versions", (string)null);
-                });
-
-            modelBuilder.Entity("Calibr8Fit.Api.Models.Food", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("uuid_generate_v4()");
 
                     b.Property<float>("Calcium")
                         .HasColumnType("real")
@@ -172,6 +103,10 @@ namespace Calibr8Fit.Api.Migrations
                     b.Property<float>("Iron")
                         .HasColumnType("real")
                         .HasColumnName("iron");
+
+                    b.Property<bool>("IsUserFood")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_user_food");
 
                     b.Property<float>("Magnesium")
                         .HasColumnType("real")
@@ -283,9 +218,81 @@ namespace Calibr8Fit.Api.Migrations
                         .HasColumnName("zinc");
 
                     b.HasKey("Id")
-                        .HasName("pk_foods");
+                        .HasName("pk_food_base");
 
-                    b.ToTable("foods", (string)null);
+                    b.ToTable("food_base", (string)null);
+
+                    b.HasDiscriminator<bool>("IsUserFood");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("Calibr8Fit.Api.Models.ActivityRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ActivityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("activity_id");
+
+                    b.Property<float>("CaloriesBurned")
+                        .HasColumnType("real")
+                        .HasColumnName("calories_burned");
+
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("deleted");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("integer")
+                        .HasColumnName("duration");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at");
+
+                    b.Property<DateTime>("SyncedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("synced_at");
+
+                    b.Property<DateTime>("Time")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("time");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_activity_records");
+
+                    b.HasIndex("ActivityId")
+                        .HasDatabaseName("ix_activity_records_activity_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_activity_records_user_id");
+
+                    b.ToTable("activity_records", (string)null);
+                });
+
+            modelBuilder.Entity("Calibr8Fit.Api.Models.DataVersion", b =>
+                {
+                    b.Property<int>("DataResource")
+                        .HasColumnType("integer")
+                        .HasColumnName("data_resource");
+
+                    b.Property<DateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_updated_at");
+
+                    b.HasKey("DataResource")
+                        .HasName("pk_data_versions");
+
+                    b.ToTable("data_versions", (string)null);
                 });
 
             modelBuilder.Entity("Calibr8Fit.Api.Models.RefreshToken", b =>
@@ -741,6 +748,42 @@ namespace Calibr8Fit.Api.Migrations
                     b.HasDiscriminator().HasValue(true);
                 });
 
+            modelBuilder.Entity("Calibr8Fit.Api.Models.Food", b =>
+                {
+                    b.HasBaseType("Calibr8Fit.Api.Models.Abstract.FoodBase");
+
+                    b.HasDiscriminator().HasValue(false);
+                });
+
+            modelBuilder.Entity("Calibr8Fit.Api.Models.UserFood", b =>
+                {
+                    b.HasBaseType("Calibr8Fit.Api.Models.Abstract.FoodBase");
+
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("deleted");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at");
+
+                    b.Property<DateTime>("SyncedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("synced_at");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.HasIndex("UserId", "Id")
+                        .HasDatabaseName("ix_food_base_user_id_id");
+
+                    b.ToTable("food_base", (string)null);
+
+                    b.HasDiscriminator().HasValue(true);
+                });
+
             modelBuilder.Entity("Calibr8Fit.Api.Models.ActivityRecord", b =>
                 {
                     b.HasOne("Calibr8Fit.Api.Models.Abstract.ActivityBase", "Activity")
@@ -875,6 +918,18 @@ namespace Calibr8Fit.Api.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Calibr8Fit.Api.Models.UserFood", b =>
+                {
+                    b.HasOne("Calibr8Fit.Api.Models.User", "User")
+                        .WithMany("UserFoods")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_food_base_asp_net_users_user_id");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Calibr8Fit.Api.Models.User", b =>
                 {
                     b.Navigation("ActivityRecords");
@@ -882,6 +937,8 @@ namespace Calibr8Fit.Api.Migrations
                     b.Navigation("Profile");
 
                     b.Navigation("UserActivities");
+
+                    b.Navigation("UserFoods");
 
                     b.Navigation("WaterIntakeRecords");
 

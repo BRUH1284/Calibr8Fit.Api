@@ -84,7 +84,7 @@ namespace Calibr8Fit.Api.Controllers.Abstract
                 );
         });
 
-        [HttpPut("{id}")]
+        [HttpPut]
         public virtual Task<IActionResult> Update([FromBody] TUpdateDto requestDto) =>
         WithUserId(async userId =>
         {

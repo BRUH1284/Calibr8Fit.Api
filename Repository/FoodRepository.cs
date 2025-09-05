@@ -9,7 +9,7 @@ namespace Calibr8Fit.Api.Repository
     public class FoodRepository(
         IDataVersionRepository dataVersionRepository,
         ApplicationDbContext context
-        ) : RepositoryBase<Food, int>(context), IFoodRepository
+        ) : RepositoryBase<Food, Guid>(context), IFoodRepository
     {
         private static readonly DataResource DataResource = DataResource.Foods;
         IDataVersionRepository IDataVersionProvider.DataVersionRepository => dataVersionRepository;

@@ -14,7 +14,7 @@ namespace Calibr8Fit.Api.Controllers
         ) : EntityControllerBase<
         Food,
         FoodDto,
-        int,
+        Guid,
         IFoodRepository,
         UpdateFoodRequestDto,
         AddFoodRequestDto

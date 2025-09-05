@@ -3,10 +3,10 @@ using Calibr8Fit.Api.Interfaces.DataTransferObjects;
 
 namespace Calibr8Fit.Api.DataTransferObjects.Food
 {
-    public class UpdateFoodRequestDto : IUpdateRequestDto<int>
+    public class UpdateFoodRequestDto : IUpdateRequestDto<Guid>
     {
         [Required]
-        public required int Id { get; set; }
+        public required Guid Id { get; set; }
         [Required]
         public required string Name { get; set; }
 

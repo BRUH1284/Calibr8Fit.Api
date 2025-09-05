@@ -4,7 +4,7 @@ namespace Calibr8Fit.Api.DataTransferObjects.Food
 {
     public class AddFoodRequestDto
     {
-        public int Id { get; set; } // Optional, will be generated if not provided
+        public Guid Id { get; set; } // Optional, will be generated if not provided
         [Required]
         public required string Name { get; set; }
 

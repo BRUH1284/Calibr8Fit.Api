@@ -12,12 +12,14 @@ namespace Calibr8Fit.Api.Data
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<ActivityBase> BaseActivities { get; set; }
+        public DbSet<Food> BaseFood { get; set; }
         public DbSet<ActivityRecord> ActivityRecords { get; set; }
         public DbSet<WaterIntakeRecord> WaterIntakeRecords { get; set; }
         public DbSet<WeightRecord> WeightRecords { get; set; }
-        public DbSet<Food> Foods { get; set; }
         public IQueryable<Activity> Activities => Set<ActivityBase>().OfType<Activity>();
         public IQueryable<UserActivity> UserActivities => Set<ActivityBase>().OfType<UserActivity>();
+        public IQueryable<Food> Foods => Set<FoodBase>().OfType<Food>();
+        public IQueryable<UserFood> UserFoods => Set<FoodBase>().OfType<UserFood>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -59,25 +61,47 @@ namespace Calibr8Fit.Api.Data
                 .HasForeignKey(rt => rt.UserId)
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> RefreshToken
 
+            // Configure BaseActivities
+            builder.Entity<ActivityBase>()
+                .Property(a => a.Id) // Id is the primary key in BaseActivity
+                .HasDefaultValueSql("uuid_generate_v4()");
+
             // Configure Activities
             builder.Entity<ActivityBase>()
                 .HasDiscriminator<bool>("IsUserActivity")
                 .HasValue<Activity>(false)
                 .HasValue<UserActivity>(true);
 
-            builder.Entity<ActivityBase>()
-                .Property(a => a.Id) // Id is the primary key in BaseActivity
-                .HasDefaultValueSql("uuid_generate_v4()");
-
             // Configure UserActivity
             builder.Entity<UserActivity>()
-            .HasIndex(ua => new { ua.UserId, ua.Id }); // Composite index for UserId and and Id
+                .HasIndex(ua => new { ua.UserId, ua.Id }); // Composite index for UserId and and Id
 
             builder.Entity<UserActivity>()
                 .HasOne(ua => ua.User)
                 .WithMany(u => u.UserActivities) // User can have many UserActivities
                 .HasForeignKey(ua => ua.UserId)
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> UserActivity
+
+            // Configure BaseFood
+            builder.Entity<FoodBase>()
+                .Property(f => f.Id) // Id is the primary key in BaseFood
+                .HasDefaultValueSql("uuid_generate_v4()");
+
+            // Configure Foods
+            builder.Entity<FoodBase>()
+                .HasDiscriminator<bool>("IsUserFood")
+                .HasValue<Food>(false)
+                .HasValue<UserFood>(true);
+
+            // Configure UserFood
+            builder.Entity<UserFood>()
+                .HasIndex(uf => new { uf.UserId, uf.Id }); // Composite index for UserId and and Id
+
+            builder.Entity<UserFood>()
+                .HasOne(uf => uf.User)
+                .WithMany(u => u.UserFoods) // User can have many UserFoods
+                .HasForeignKey(uf => uf.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> UserFood
 
             // Configure ActivityRecord
             builder.Entity<ActivityRecord>()
