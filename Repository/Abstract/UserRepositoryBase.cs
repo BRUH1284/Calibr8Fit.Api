@@ -3,7 +3,7 @@ using Calibr8Fit.Api.Interfaces.Model;
 using Calibr8Fit.Api.Interfaces.Repository;
 using Microsoft.EntityFrameworkCore;
 
-namespace Calibr8Fit.Api.Repository
+namespace Calibr8Fit.Api.Repository.Abstract
 {
     public abstract class UserRepositoryBase<T, HT, TKey>(
         ApplicationDbContext context

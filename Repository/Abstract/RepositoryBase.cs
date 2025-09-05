@@ -3,7 +3,7 @@ using Calibr8Fit.Api.Interfaces.Model;
 using Calibr8Fit.Api.Interfaces.Repository;
 using Microsoft.EntityFrameworkCore;
 
-namespace Calibr8Fit.Api.Repository
+namespace Calibr8Fit.Api.Repository.Abstract
 {
     public abstract class RepositoryBase<T, HT, TKey>(
         ApplicationDbContext context
@@ -48,6 +48,23 @@ namespace Calibr8Fit.Api.Repository
             // Check if entity already exists
             if (await KeyExistsInHierarchyAsync(entity.Id)) return null;
 
+            if (typeof(TKey) == typeof(int) && entity.Id.Equals(default(TKey)))
+            {
+                var entry = _context.Entry(entity);
+                var et = entry.Metadata;
+                var schema = et.GetSchema() ?? "public";
+                var table = et.GetTableName()!;
+
+                // For integer keys, ensure the key is not set (auto-increment)
+                var sql = $@"
+                    SELECT setval(
+                    pg_get_serial_sequence('""{schema}"".""{table}""', 'id'),
+                    COALESCE((SELECT MAX(id) FROM ""{schema}"".""{table}""), 0),
+                    true
+                );";
+                await _context.Database.ExecuteSqlRawAsync(sql);
+            }
+
             // Add new entity to DB
             await _dbSet.AddAsync(entity);
             await SaveChangesAsync();
@@ -87,13 +104,8 @@ namespace Calibr8Fit.Api.Repository
                 return existing;
             }
 
-            // If entity does not exist, check if it can be added
-            if (await KeyExistsInHierarchyAsync(entity.Id)) return null;
-
-            // Add new entity to DB
-            await _dbSet.AddAsync(entity);
-            await SaveChangesAsync();
-            return entity;
+            // If entity does not exist try to add it
+            return await AddAsync(entity);
         }
 
         public virtual async Task<T?> UpdateAsync(T entity)

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Calibr8Fit.Api.Controllers.Abstract
 {
+    [ApiController]
     public abstract class EntityControllerBase<
         TEntity,
         TDto,

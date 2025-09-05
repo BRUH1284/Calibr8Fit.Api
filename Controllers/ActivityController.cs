@@ -3,7 +3,6 @@ using Calibr8Fit.Api.DataTransferObjects.Activity;
 using Calibr8Fit.Api.Interfaces.Repository;
 using Calibr8Fit.Api.Mappers;
 using Calibr8Fit.Api.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Calibr8Fit.Api.Controllers

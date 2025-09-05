@@ -15,6 +15,7 @@ namespace Calibr8Fit.Api.Data
         public DbSet<ActivityRecord> ActivityRecords { get; set; }
         public DbSet<WaterIntakeRecord> WaterIntakeRecords { get; set; }
         public DbSet<WeightRecord> WeightRecords { get; set; }
+        public DbSet<Food> Foods { get; set; }
         public IQueryable<Activity> Activities => Set<ActivityBase>().OfType<Activity>();
         public IQueryable<UserActivity> UserActivities => Set<ActivityBase>().OfType<UserActivity>();
 

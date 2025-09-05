@@ -6,12 +6,12 @@ using Calibr8Fit.Api.Repository.Abstract;
 
 namespace Calibr8Fit.Api.Repository
 {
-    public class ActivityRepository(
+    public class FoodRepository(
         IDataVersionRepository dataVersionRepository,
         ApplicationDbContext context
-        ) : RepositoryBase<Activity, Guid>(context), IActivityRepository
+        ) : RepositoryBase<Food, int>(context), IFoodRepository
     {
-        private static readonly DataResource DataResource = DataResource.Activities;
+        private static readonly DataResource DataResource = DataResource.Foods;
         IDataVersionRepository IDataVersionProvider.DataVersionRepository => dataVersionRepository;
         DataResource IDataVersionProvider.DataResource => DataResource;
         protected override async Task SaveChangesAsync()

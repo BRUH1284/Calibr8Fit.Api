@@ -10,7 +10,7 @@ namespace Calibr8Fit.Api.Mappers
         {
             return new ActivityDto
             {
-                Id = activity.Id, // Ensure Id is not null
+                Id = activity.Id,
                 MajorHeading = activity.MajorHeading,
                 MetValue = activity.MetValue,
                 Description = activity.Description

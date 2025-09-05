@@ -60,6 +60,7 @@ builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<IDataVersionRepository, DataVersionRepository>();
 builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
+builder.Services.AddScoped<IFoodRepository, FoodRepository>();
 builder.Services.AddScoped<IUserActivityRepository, UserActivityRepository>();
 builder.Services.AddScoped<IUserSyncRepositoryBase<UserActivity, Guid>, UserActivityRepository>();
 builder.Services.AddScoped<IActivityRecordRepository, ActivityRecordRepository>();
