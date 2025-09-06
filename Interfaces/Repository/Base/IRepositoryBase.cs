@@ -1,6 +1,6 @@
 using Calibr8Fit.Api.Interfaces.Model;
 
-namespace Calibr8Fit.Api.Interfaces.Repository
+namespace Calibr8Fit.Api.Interfaces.Repository.Base
 {
     public interface IRepositoryBase<T, TKey>
         where T : class, IEntity<TKey>

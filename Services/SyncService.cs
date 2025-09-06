@@ -1,5 +1,5 @@
 using Calibr8Fit.Api.Interfaces.Model;
-using Calibr8Fit.Api.Interfaces.Repository;
+using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Calibr8Fit.Api.Interfaces.Service;
 
 namespace Calibr8Fit.Api.Services

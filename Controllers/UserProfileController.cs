@@ -1,8 +1,9 @@
 using Calibr8Fit.Api.Controllers.Abstract;
 using Calibr8Fit.Api.DataTransferObjects.User;
-using Calibr8Fit.Api.Interfaces.Repository;
+using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Mappers;
+using Calibr8Fit.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,10 +13,10 @@ namespace Calibr8Fit.Api.Controllers
     [Route("api/user-profile")]
     public class UserProfileController(
         ICurrentUserService currentUserService,
-        IUserProfileRepository userProfileRepository
+        IRepositoryBase<UserProfile, string> userProfileRepository
         ) : UserControllerBase(currentUserService)
     {
-        private readonly IUserProfileRepository _userProfileRepository = userProfileRepository;
+        private readonly IRepositoryBase<UserProfile, string> _userProfileRepository = userProfileRepository;
 
         [HttpGet]
         [Authorize]

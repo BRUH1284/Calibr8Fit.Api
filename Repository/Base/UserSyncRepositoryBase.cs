@@ -1,11 +1,11 @@
 using Calibr8Fit.Api.Data;
 using Calibr8Fit.Api.Interfaces.Model;
-using Calibr8Fit.Api.Interfaces.Repository;
+using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Microsoft.EntityFrameworkCore;
 
-namespace Calibr8Fit.Api.Repository.Abstract
+namespace Calibr8Fit.Api.Repository.Base
 {
-    public abstract class UserSyncRepositoryBase<T, HT, TKey>(
+    public class UserSyncRepositoryBase<T, HT, TKey>(
         ApplicationDbContext context
     ) : UserRepositoryBase<T, HT, TKey>(context), IUserSyncRepositoryBase<T, TKey>
         where T : class, ISyncableUserEntity<TKey>
@@ -62,7 +62,7 @@ namespace Calibr8Fit.Api.Repository.Abstract
         }
     }
 
-    public abstract class UserSyncRepositoryBase<T, TKey>(
+    public class UserSyncRepositoryBase<T, TKey>(
         ApplicationDbContext context
     ) : UserSyncRepositoryBase<T, T, TKey>(context)
         where T : class, ISyncableUserEntity<TKey>

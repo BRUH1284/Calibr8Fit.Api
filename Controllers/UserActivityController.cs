@@ -1,6 +1,6 @@
 using Calibr8Fit.Api.Controllers.Abstract;
 using Calibr8Fit.Api.DataTransferObjects.UserActivity;
-using Calibr8Fit.Api.Interfaces.Repository;
+using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Mappers;
 using Calibr8Fit.Api.Models;
@@ -14,13 +14,13 @@ namespace Calibr8Fit.Api.Controllers
     [Authorize]
     public class UserActivityController(
         ICurrentUserService currentUserService,
-        IUserActivityRepository userActivityRepository,
+        IUserSyncRepositoryBase<UserActivity, Guid> userActivityRepository,
         ISyncService<UserActivity, Guid> syncService
         ) : SyncableEntityControllerBase<
             UserActivity,
             UserActivityDto,
             Guid,
-            IUserActivityRepository,
+            IUserSyncRepositoryBase<UserActivity, Guid>,
             UpdateUserActivityRequestDto,
             AddUserActivityRequestDto,
             SyncUserActivitiesRequestDto,

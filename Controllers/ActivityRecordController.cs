@@ -1,6 +1,6 @@
 using Calibr8Fit.Api.Controllers.Abstract;
 using Calibr8Fit.Api.DataTransferObjects.ActivityRecord;
-using Calibr8Fit.Api.Interfaces.Repository;
+using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Mappers;
 using Calibr8Fit.Api.Models;
@@ -13,15 +13,15 @@ namespace Calibr8Fit.Api.Controllers
     [ApiController]
     [Authorize]
     public class ActivityRecordController(
-        IActivityRecordRepository activityRecordRepository,
+        IUserSyncRepositoryBase<ActivityRecord, Guid> activityRecordRepository,
         ICurrentUserService currentUserService,
         ISyncService<ActivityRecord, Guid> syncService,
-        IActivityValidationService activityValidationService
+        ITPHValidationService<Guid> activityValidationService
     ) : SyncableEntityControllerBase<
         ActivityRecord,
         ActivityRecordDto,
         Guid,
-        IActivityRecordRepository,
+        IUserSyncRepositoryBase<ActivityRecord, Guid>,
         UpdateActivityRecordRequestDto,
         AddActivityRecordRequestDto,
         SyncActivityRecordRequestDto,
@@ -36,7 +36,7 @@ namespace Calibr8Fit.Api.Controllers
         ActivityRecordMapper.ToSyncActivityRecordResponseDto
         )
     {
-        private readonly IActivityValidationService _activityValidationService = activityValidationService;
+        private readonly ITPHValidationService<Guid> _activityValidationService = activityValidationService;
 
         [HttpPost("sync")]
         public override Task<IActionResult> Sync([FromBody] SyncActivityRecordRequestDto requestDto) =>
@@ -46,7 +46,7 @@ namespace Calibr8Fit.Api.Controllers
                 foreach (var record in requestDto.ActivityRecords)
                 {
                     // Check if activity exists
-                    if (!await _activityValidationService.ValidateActivityLinkAsync(user.Id, record.ActivityId))
+                    if (!await _activityValidationService.ValidateUserAccessAsync(user.Id, record.ActivityId))
                         return BadRequest($"Activity with id: {record.ActivityId} does not exist for user.");
                 }
 
@@ -57,7 +57,7 @@ namespace Calibr8Fit.Api.Controllers
             WithUserId(async userId =>
             {
                 // Validate activity record link
-                if (!await _activityValidationService.ValidateActivityLinkAsync(userId, requestDto.ActivityId))
+                if (!await _activityValidationService.ValidateUserAccessAsync(userId, requestDto.ActivityId))
                     return BadRequest($"Activity with id: {requestDto.ActivityId} does not exist for user.");
 
                 return await base.Add(requestDto);

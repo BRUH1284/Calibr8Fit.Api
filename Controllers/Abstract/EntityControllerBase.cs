@@ -1,6 +1,7 @@
 using Calibr8Fit.Api.Interfaces.DataTransferObjects;
 using Calibr8Fit.Api.Interfaces.Model;
 using Calibr8Fit.Api.Interfaces.Repository;
+using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

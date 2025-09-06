@@ -1,6 +1,6 @@
 using Calibr8Fit.Api.Controllers.Abstract;
 using Calibr8Fit.Api.DataTransferObjects.WaterIntakeRecord;
-using Calibr8Fit.Api.Interfaces.Repository;
+using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Mappers;
 using Calibr8Fit.Api.Models;
@@ -13,14 +13,14 @@ namespace Calibr8Fit.Api.Controllers
     [ApiController]
     [Authorize]
     public class WaterIntakeController(
-        IWaterIntakeRecordRepository waterIntakeRecordRepository,
+        IUserSyncRepositoryBase<WaterIntakeRecord, Guid> waterIntakeRecordRepository,
         ICurrentUserService currentUserService,
         ISyncService<WaterIntakeRecord, Guid> syncService
         ) : SyncableEntityControllerBase<
         WaterIntakeRecord,
         WaterIntakeRecordDto,
         Guid,
-        IWaterIntakeRecordRepository,
+        IUserSyncRepositoryBase<WaterIntakeRecord, Guid>,
         UpdateWaterIntakeRecordRequestDto,
         AddWaterIntakeRecordRequestDto,
         SyncWaterIntakeRecordRequestDto,

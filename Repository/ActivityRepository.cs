@@ -2,7 +2,7 @@ using Calibr8Fit.Api.Data;
 using Calibr8Fit.Api.Enums;
 using Calibr8Fit.Api.Interfaces.Repository;
 using Calibr8Fit.Api.Models;
-using Calibr8Fit.Api.Repository.Abstract;
+using Calibr8Fit.Api.Repository.Base;
 
 namespace Calibr8Fit.Api.Repository
 {

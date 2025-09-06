@@ -1,6 +1,6 @@
 using Calibr8Fit.Api.Controllers.Abstract;
 using Calibr8Fit.Api.DataTransferObjects.WeightRecord;
-using Calibr8Fit.Api.Interfaces.Repository;
+using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Mappers;
 using Calibr8Fit.Api.Models;
@@ -13,14 +13,14 @@ namespace Calibr8Fit.Api.Controllers
     [ApiController]
     [Authorize]
     public class WeightController(
-        IWeightRecordRepository weightRecordRepository,
+        IUserSyncRepositoryBase<WeightRecord, Guid> weightRecordRepository,
         ICurrentUserService currentUserService,
         ISyncService<WeightRecord, Guid> syncService
         ) : SyncableEntityControllerBase<
         WeightRecord,
         WeightRecordDto,
         Guid,
-        IWeightRecordRepository,
+        IUserSyncRepositoryBase<WeightRecord, Guid>,
         UpdateWeightRecordRequestDto,
         AddWeightRecordRequestDto,
         SyncWeightRecordRequestDto,

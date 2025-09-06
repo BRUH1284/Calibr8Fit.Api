@@ -1,6 +1,6 @@
 using Calibr8Fit.Api.Controllers.Abstract;
 using Calibr8Fit.Api.DataTransferObjects.UserFood;
-using Calibr8Fit.Api.Interfaces.Repository;
+using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Mappers;
 using Calibr8Fit.Api.Models;
@@ -12,13 +12,13 @@ namespace Calibr8Fit.Api.Controllers
     [ApiController]
     public class UserFoodController(
         ICurrentUserService currentUserService,
-        IUserFoodRepository userFoodRepository,
+        IUserSyncRepositoryBase<UserFood, Guid> userFoodRepository,
         ISyncService<UserFood, Guid> syncService
         ) : SyncableEntityControllerBase<
         UserFood,
         UserFoodDto,
         Guid,
-        IUserFoodRepository,
+        IUserSyncRepositoryBase<UserFood, Guid>,
         UpdateUserFoodRequestDto,
         AddUserFoodRequestDto,
         SyncUserFoodsRequestDto,
