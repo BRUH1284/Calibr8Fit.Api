@@ -10,14 +10,14 @@ namespace Calibr8Fit.Api.Services
         TUserEntity
     >(
         IRepositoryBase<TEntity, TKey> repository,
-        IUserSyncRepositoryBase<TUserEntity, TKey> userRepository
+        IUserRepositoryBase<TUserEntity, TKey> userRepository
     ) : ITPHValidationService<TKey>
         where TEntity : class, IEntity<TKey>
         where TUserEntity : class, IUserEntity<TKey>
         where TKey : notnull
     {
         private readonly IRepositoryBase<TEntity, TKey> _repository = repository;
-        private readonly IUserSyncRepositoryBase<TUserEntity, TKey> _userRepository = userRepository;
+        private readonly IUserRepositoryBase<TUserEntity, TKey> _userRepository = userRepository;
         public async Task<bool> ValidateUserAccessAsync(string userId, TKey entityId)
         {
             // Check if entity exists

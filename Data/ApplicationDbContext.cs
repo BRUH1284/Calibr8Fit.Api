@@ -20,6 +20,8 @@ namespace Calibr8Fit.Api.Data
         public IQueryable<UserActivity> UserActivities => Set<ActivityBase>().OfType<UserActivity>();
         public IQueryable<Food> Foods => Set<FoodBase>().OfType<Food>();
         public IQueryable<UserFood> UserFoods => Set<FoodBase>().OfType<UserFood>();
+        public DbSet<UserMeal> UserMeals { get; set; }
+        public DbSet<UserMealItem> UserMealItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -130,6 +132,29 @@ namespace Calibr8Fit.Api.Data
                 .WithMany(u => u.WeightRecords) // User can have many WeightRecords
                 .HasForeignKey(wr => wr.UserId)
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> WeightRecord
+
+            // Configure UserMeal
+            builder.Entity<UserMeal>()
+                .HasOne(um => um.User)
+                .WithMany(u => u.UserMeals) // User can have many UserMeals
+                .HasForeignKey(um => um.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> UserMeal
+
+            // Configure UserMealItem
+            builder.Entity<UserMealItem>()
+                .HasKey(umi => new { umi.UserMealId, umi.FoodId }); // Composite key
+
+            builder.Entity<UserMealItem>()
+                .HasOne(umi => umi.UserMeal)
+                .WithMany(um => um.MealItems) // UserMeal can have many UserMealItems
+                .HasForeignKey(umi => umi.UserMealId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for UserMeal -> UserMealItem
+
+            builder.Entity<UserMealItem>()
+                .HasOne(umi => umi.Food)
+                .WithMany() // FoodBase can have many UserMealItems
+                .HasForeignKey(umi => umi.FoodId)
+                .OnDelete(DeleteBehavior.Restrict); // Don't cascade delete Food -> UserMealItem
         }
     }
 }

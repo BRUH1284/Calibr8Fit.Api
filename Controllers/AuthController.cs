@@ -1,21 +1,22 @@
 using Calibr8Fit.Api.DataTransferObjects.Authentication;
 using Calibr8Fit.Api.DataTransferObjects.Token;
 using Calibr8Fit.Api.Interfaces.Service;
-using Calibr8Fit.Api.Interfaces.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Calibr8Fit.Api.Controllers.Abstract;
+using Calibr8Fit.Api.Interfaces.Repository.Base;
+using Calibr8Fit.Api.Models;
 namespace Calibr8Fit.Api.Controllers
 {
     [Route("api/auth")]
     [ApiController]
     public class AuthController(
-        IRefreshTokenRepository refreshTokenRepo,
+        IUserRepositoryBase<RefreshToken, string[]> refreshTokenRepo,
         IAuthService authService,
         ICurrentUserService currentUserService
         ) : UserControllerBase(currentUserService)
     {
-        private readonly IRefreshTokenRepository _refreshTokenRepo = refreshTokenRepo;
+        private readonly IUserRepositoryBase<RefreshToken, string[]> _refreshTokenRepo = refreshTokenRepo;
         private readonly IAuthService _authService = authService;
 
         [HttpPost("register")]

@@ -7,7 +7,7 @@ namespace Calibr8Fit.Api.Repository
 {
     public class RefreshTokenRepository(
         ApplicationDbContext context
-        ) : UserRepositoryBase<RefreshToken, string[]>(context), IRefreshTokenRepository
+        ) : UserRepositoryBase<RefreshToken, string[]>(context)
     {
         public override ValueTask<RefreshToken?> GetAsync(string[] key)
         {

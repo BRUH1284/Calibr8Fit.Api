@@ -1,6 +1,5 @@
 using Calibr8Fit.Api.DataTransferObjects.Authentication;
 using Calibr8Fit.Api.DataTransferObjects.Token;
-using Calibr8Fit.Api.Interfaces.Repository;
 using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Models;
@@ -14,13 +13,14 @@ namespace Calibr8Fit.Api.Services
         UserManager<User> userManager,
         SignInManager<User> signInManager,
         ITokenService tokenService,
-        IRefreshTokenRepository refreshTokenRepo,
-        IRepositoryBase<UserProfile, string> userProfileRepo) : IAuthService
+        IUserRepositoryBase<RefreshToken, string[]> refreshTokenRepo,
+        IRepositoryBase<UserProfile, string> userProfileRepo
+        ) : IAuthService
     {
         private readonly UserManager<User> _userManager = userManager;
         private readonly SignInManager<User> _signInManager = signInManager;
         private readonly ITokenService _tokenService = tokenService;
-        private readonly IRefreshTokenRepository _refreshTokenRepo = refreshTokenRepo;
+        private readonly IUserRepositoryBase<RefreshToken, string[]> _refreshTokenRepo = refreshTokenRepo;
         private readonly IRepositoryBase<UserProfile, string> _userProfileRepo = userProfileRepo;
 
         public async Task<IdentityResult<TokenDto>> RegisterUserAsync(RegisterDto registerDto)

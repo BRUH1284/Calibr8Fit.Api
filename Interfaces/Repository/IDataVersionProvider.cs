@@ -4,12 +4,6 @@ namespace Calibr8Fit.Api.Interfaces.Repository
 {
     public interface IDataVersionProvider
     {
-        IDataVersionRepository DataVersionRepository { get; }
-        DataResource DataResource { get; }
-        public Task<DateTime?> LastUpdatedAtAsync()
-        {
-            // Get last updated time for the specific data resource
-            return DataVersionRepository.LastUpdatedAtAsync(DataResource);
-        }
+        public Task<DateTime?> LastUpdatedAtAsync();
     }
 }

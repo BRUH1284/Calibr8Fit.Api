@@ -1,6 +1,6 @@
 using Calibr8Fit.Api.Controllers.Abstract;
 using Calibr8Fit.Api.DataTransferObjects.Activity;
-using Calibr8Fit.Api.Interfaces.Repository;
+using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Calibr8Fit.Api.Mappers;
 using Calibr8Fit.Api.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -10,12 +10,12 @@ namespace Calibr8Fit.Api.Controllers
     [Route("api/activity")]
     [ApiController]
     public class ActivityController(
-        IActivityRepository activityRepository
+        IDataVersionRepositoryBase<Activity, Guid> activityRepository
         ) : EntityControllerBase<
         Activity,
         ActivityDto,
         Guid,
-        IActivityRepository,
+        IDataVersionRepositoryBase<Activity, Guid>,
         UpdateActivityRequestDto,
         AddActivityRequestDto
         >(

@@ -1,4 +1,5 @@
 using Calibr8Fit.Api.Data;
+using Calibr8Fit.Api.Enums;
 using Calibr8Fit.Api.Extensions;
 using Calibr8Fit.Api.Interfaces.Repository;
 using Calibr8Fit.Api.Interfaces.Repository.Base;
@@ -51,28 +52,26 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddScoped<ISyncService<UserActivity, Guid>, SyncService<UserActivity, Guid>>();
-builder.Services.AddScoped<ISyncService<ActivityRecord, Guid>, SyncService<ActivityRecord, Guid>>();
 builder.Services.AddScoped<ITPHValidationService<Guid>, TPHValidationService<Guid, Activity, UserActivity>>();
-builder.Services.AddScoped<ISyncService<UserFood, Guid>, SyncService<UserFood, Guid>>();
-builder.Services.AddScoped<ISyncService<WaterIntakeRecord, Guid>, SyncService<WaterIntakeRecord, Guid>>();
-builder.Services.AddScoped<ISyncService<WeightRecord, Guid>, SyncService<WeightRecord, Guid>>();
 
 // Repositories
-builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-builder.Services.AddScoped<IRepositoryBase<UserProfile, string>, RepositoryBase<UserProfile, string>>();
 builder.Services.AddScoped<IDataVersionRepository, DataVersionRepository>();
-builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
-builder.Services.AddScoped<IFoodRepository, FoodRepository>();
-builder.Services.AddScoped<IRepositoryBase<Activity, Guid>, ActivityRepository>();
-builder.Services.AddScoped<IUserSyncRepositoryBase<UserActivity, Guid>, UserSyncRepositoryBase<UserActivity, Guid>>();
-builder.Services.AddScoped<IUserSyncRepositoryBase<ActivityRecord, Guid>, UserSyncRepositoryBase<ActivityRecord, Guid>>();
-builder.Services.AddScoped<IUserSyncRepositoryBase<UserFood, Guid>, UserSyncRepositoryBase<UserFood, Guid>>();
-builder.Services.AddScoped<IUserSyncRepositoryBase<WaterIntakeRecord, Guid>, UserSyncRepositoryBase<WaterIntakeRecord, Guid>>();
-builder.Services.AddScoped<IUserSyncRepositoryBase<WeightRecord, Guid>, UserSyncRepositoryBase<WeightRecord, Guid>>();
-builder.Services.AddScoped<IUserMealRepository, UserMealRepository>();
-builder.Services.AddScoped<IUserSyncRepositoryBase<UserMeal, Guid>, UserMealRepository>();
+builder.Services.AddScoped<IUserRepositoryBase<RefreshToken, string[]>, RefreshTokenRepository>();
+builder.Services.AddScoped<IRepositoryBase<UserProfile, string>, RepositoryBase<UserProfile, string>>();
+builder.Services.AddScoped<IRepositoryBase<Activity, Guid>, RepositoryBase<Activity, Guid>>();
+builder.Services.AddScoped<IRepositoryBase<Food, Guid>, RepositoryBase<Food, Guid>>();
 
+// Data Version Repositories
+builder.Services.AddDataVersionRepo<Food, Guid>(DataResource.Foods);
+builder.Services.AddDataVersionRepo<Activity, Guid>(DataResource.Activities);
+
+// Sync Repositories
+builder.Services.AddUserSyncRepo<UserActivity, Guid>();
+builder.Services.AddUserSyncRepo<ActivityRecord, Guid>();
+builder.Services.AddUserSyncRepo<UserFood, Guid>();
+builder.Services.AddUserSyncRepo<WaterIntakeRecord, Guid>();
+builder.Services.AddUserSyncRepo<WeightRecord, Guid>();
+builder.Services.AddUserSyncRepo<UserMeal, Guid>();
 
 builder.Services.AddOpenApi("v1", options =>
 {
