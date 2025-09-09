@@ -29,12 +29,13 @@ namespace Calibr8Fit.Api.Repository
             return dataVersion;
         }
 
-        public async Task<DateTime?> LastUpdatedAtAsync(DataResource dataResource)
+        public async Task<DateTime> LastUpdatedAtAsync(DataResource dataResource)
         {
             var dataVersion = await _context.DataVersions.FindAsync(dataResource);
 
-            // If there is no record, add new
-            dataVersion ??= await AddOrUpdateAsync(dataResource);
+            // If no data version exists, return DateTime.MinValue
+            if (dataVersion?.LastUpdatedAt is null)
+                return DateTime.MinValue;
 
             return dataVersion.LastUpdatedAt;
         }

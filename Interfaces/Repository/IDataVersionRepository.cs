@@ -7,6 +7,6 @@ namespace Calibr8Fit.Api.Interfaces.Repository
     public interface IDataVersionRepository : IRepositoryBase<DataVersion, DataResource>
     {
         Task<DataVersion> AddOrUpdateAsync(DataResource dataResource);
-        Task<DateTime?> LastUpdatedAtAsync(DataResource dataResource);
+        Task<DateTime> LastUpdatedAtAsync(DataResource dataResource);
     }
 }

@@ -29,15 +29,8 @@ namespace Calibr8Fit.Api.Controllers.Abstract
         protected readonly TRepository _repository = repository;
 
         [HttpGet("last-updated-at")]
-        public async Task<IActionResult> GetLastUpdatedAt()
-        {
-            var lastUpdatedAt = await _repository.LastUpdatedAtAsync();
-
-            // If no last updated time, return NoContent
-            return lastUpdatedAt is null
-                ? NoContent()
-                : Ok(lastUpdatedAt);
-        }
+        public async Task<IActionResult> GetLastUpdatedAt() =>
+            Ok(await _repository.LastUpdatedAtAsync());
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {

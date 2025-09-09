@@ -19,7 +19,7 @@ namespace Calibr8Fit.Api.Repository.Base
         private readonly IDataVersionRepository _dataVersionRepository = dataVersionRepository;
 
         /// Get last updated time for the specific data resource
-        public Task<DateTime?> LastUpdatedAtAsync() =>
+        public Task<DateTime> LastUpdatedAtAsync() =>
             _dataVersionRepository.LastUpdatedAtAsync(DataResource);
 
         protected override async Task SaveChangesAsync()

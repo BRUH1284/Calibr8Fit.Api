@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Calibr8Fit.Api.Controllers
 {
-    [Route("api/user-food")]
+    [Route("api/food/my")]
     [ApiController]
     public class UserFoodController(
         ICurrentUserService currentUserService,
