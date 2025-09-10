@@ -40,13 +40,13 @@ namespace Calibr8Fit.Api.Controllers
 
         [HttpPost("sync")]
         public override Task<IActionResult> Sync([FromBody] SyncActivityRecordRequestDto requestDto) =>
-            WithUser(async user =>
+            WithUserId(async userId =>
             {
                 // Validate activity record links
                 foreach (var record in requestDto.ActivityRecords)
                 {
                     // Check if activity exists
-                    if (!await _activityValidationService.ValidateUserAccessAsync(user.Id, record.ActivityId))
+                    if (!await _activityValidationService.ValidateUserAccessAsync(userId, record.ActivityId))
                         return BadRequest($"Activity with id: {record.ActivityId} does not exist for user.");
                 }
 

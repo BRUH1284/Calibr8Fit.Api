@@ -53,6 +53,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<ITPHValidationService<Guid>, TPHValidationService<Guid, Activity, UserActivity>>();
+builder.Services.AddScoped<ITPHValidationService<Guid>, TPHValidationService<Guid, Food, UserFood>>();
 
 // Repositories
 builder.Services.AddScoped<IDataVersionRepository, DataVersionRepository>();
@@ -68,6 +69,7 @@ builder.Services.AddDataVersionRepo<Activity, Guid>(DataResource.Activities);
 // Sync Repositories
 builder.Services.AddUserSyncRepo<UserActivity, Guid>();
 builder.Services.AddUserSyncRepo<ActivityRecord, Guid>();
+builder.Services.AddUserSyncRepo<ConsumptionRecord, Guid>();
 builder.Services.AddUserSyncRepo<UserFood, Guid>();
 builder.Services.AddUserSyncRepo<WaterIntakeRecord, Guid>();
 builder.Services.AddUserSyncRepo<WeightRecord, Guid>();

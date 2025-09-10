@@ -14,6 +14,7 @@ namespace Calibr8Fit.Api.Data
         public DbSet<ActivityBase> BaseActivities { get; set; }
         public DbSet<Food> BaseFood { get; set; }
         public DbSet<ActivityRecord> ActivityRecords { get; set; }
+        public DbSet<ConsumptionRecord> ConsumptionRecords { get; set; }
         public DbSet<WaterIntakeRecord> WaterIntakeRecords { get; set; }
         public DbSet<WeightRecord> WeightRecords { get; set; }
         public IQueryable<Activity> Activities => Set<ActivityBase>().OfType<Activity>();
@@ -118,6 +119,27 @@ namespace Calibr8Fit.Api.Data
                 .WithMany() // ActivityBase can have many ActivityRecords
                 .HasForeignKey(ar => ar.ActivityId)
                 .OnDelete(DeleteBehavior.Restrict); // Don't cascade delete Activity -> ActivityRecord
+
+            // Configure ConsumptionRecord
+            builder.Entity<ConsumptionRecord>()
+                .HasOne(cr => cr.User)
+                .WithMany(u => u.ConsumptionRecords) // User can have many ConsumptionRecords
+                .HasForeignKey(cr => cr.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> ConsumptionRecord
+
+            // Configure ConsumptionRecord -> Food relationship
+            builder.Entity<ConsumptionRecord>()
+                .HasOne(cr => cr.Food)
+                .WithMany() // FoodBase can have many ConsumptionRecords
+                .HasForeignKey(cr => cr.FoodId)
+                .OnDelete(DeleteBehavior.Restrict); // Don't cascade delete Food -> ConsumptionRecord
+
+            // Configure ConsumptionRecord -> UserMeal relationship
+            builder.Entity<ConsumptionRecord>()
+                .HasOne(cr => cr.UserMeal)
+                .WithMany() // UserMeal can have many ConsumptionRecords
+                .HasForeignKey(cr => cr.UserMealId)
+                .OnDelete(DeleteBehavior.Restrict); // Don't cascade delete UserMeal -> ConsumptionRecord
 
             // Configure WaterIntakeRecord
             builder.Entity<WaterIntakeRecord>()
