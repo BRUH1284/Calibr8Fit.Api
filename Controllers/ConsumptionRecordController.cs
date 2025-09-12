@@ -16,7 +16,7 @@ namespace Calibr8Fit.Api.Controllers
         IUserSyncRepositoryBase<ConsumptionRecord, Guid> consumptionRecordRepository,
         ICurrentUserService currentUserService,
         ISyncService<ConsumptionRecord, Guid> syncService,
-        ITPHValidationService<Guid> foodValidationService
+        ITPHValidationService<Guid, Food, UserFood> foodValidationService
     ) : SyncableEntityControllerBase<
         ConsumptionRecord,
         ConsumptionRecordDto,
@@ -36,7 +36,7 @@ namespace Calibr8Fit.Api.Controllers
         ConsumptionRecordMapper.ToSyncConsumptionRecordResponseDto
     )
     {
-        private readonly ITPHValidationService<Guid> _foodValidationService = foodValidationService;
+        private readonly ITPHValidationService<Guid, Food, UserFood> _foodValidationService = foodValidationService;
 
         [HttpPost("sync")]
         public override Task<IActionResult> Sync([FromBody] SyncConsumptionRecordRequestDto requestDto) =>

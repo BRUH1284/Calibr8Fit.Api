@@ -11,7 +11,7 @@ namespace Calibr8Fit.Api.Services
     >(
         IRepositoryBase<TEntity, TKey> repository,
         IUserRepositoryBase<TUserEntity, TKey> userRepository
-    ) : ITPHValidationService<TKey>
+    ) : ITPHValidationService<TKey, TEntity, TUserEntity>
         where TEntity : class, IEntity<TKey>
         where TUserEntity : class, IUserEntity<TKey>
         where TKey : notnull

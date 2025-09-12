@@ -52,8 +52,8 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddScoped<ITPHValidationService<Guid>, TPHValidationService<Guid, Activity, UserActivity>>();
-builder.Services.AddScoped<ITPHValidationService<Guid>, TPHValidationService<Guid, Food, UserFood>>();
+builder.Services.AddScoped<ITPHValidationService<Guid, Activity, UserActivity>, TPHValidationService<Guid, Activity, UserActivity>>();
+builder.Services.AddScoped<ITPHValidationService<Guid, Food, UserFood>, TPHValidationService<Guid, Food, UserFood>>();
 
 // Repositories
 builder.Services.AddScoped<IDataVersionRepository, DataVersionRepository>();

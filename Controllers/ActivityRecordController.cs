@@ -16,7 +16,7 @@ namespace Calibr8Fit.Api.Controllers
         IUserSyncRepositoryBase<ActivityRecord, Guid> activityRecordRepository,
         ICurrentUserService currentUserService,
         ISyncService<ActivityRecord, Guid> syncService,
-        ITPHValidationService<Guid> activityValidationService
+        ITPHValidationService<Guid, Activity, UserActivity> activityValidationService
     ) : SyncableEntityControllerBase<
         ActivityRecord,
         ActivityRecordDto,
@@ -36,7 +36,7 @@ namespace Calibr8Fit.Api.Controllers
         ActivityRecordMapper.ToSyncActivityRecordResponseDto
         )
     {
-        private readonly ITPHValidationService<Guid> _activityValidationService = activityValidationService;
+        private readonly ITPHValidationService<Guid, Activity, UserActivity> _activityValidationService = activityValidationService;
 
         [HttpPost("sync")]
         public override Task<IActionResult> Sync([FromBody] SyncActivityRecordRequestDto requestDto) =>
