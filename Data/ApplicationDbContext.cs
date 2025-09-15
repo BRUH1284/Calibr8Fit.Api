@@ -23,6 +23,7 @@ namespace Calibr8Fit.Api.Data
         public IQueryable<UserFood> UserFoods => Set<FoodBase>().OfType<UserFood>();
         public DbSet<UserMeal> UserMeals { get; set; }
         public DbSet<UserMealItem> UserMealItems { get; set; }
+        public DbSet<DailyBurnTarget> DailyBurnTargets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -177,6 +178,25 @@ namespace Calibr8Fit.Api.Data
                 .WithMany() // FoodBase can have many UserMealItems
                 .HasForeignKey(umi => umi.FoodId)
                 .OnDelete(DeleteBehavior.Restrict); // Don't cascade delete Food -> UserMealItem
+
+            // Insert check to ensure either FoodId or UserMealId is set, but not both
+            builder.Entity<ConsumptionRecord>()
+                .ToTable(tb => tb.HasCheckConstraint("ck_consumption_record_food_id_user_meal_id",
+                    "(food_id IS NOT NULL) != (user_meal_id IS NOT NULL)"));
+
+            // Configure DailyBurnTarget
+            builder.Entity<DailyBurnTarget>()
+                .HasOne(dbt => dbt.User)
+                .WithMany(u => u.DailyBurnTargets) // User can have many DailyBurnTargets
+                .HasForeignKey(dbt => dbt.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> DailyBurnTarget
+
+            builder.Entity<DailyBurnTarget>()
+                .HasOne(dbt => dbt.Activity)
+                .WithMany() // ActivityBase can have many DailyBurnTargets
+                .HasForeignKey(dbt => dbt.ActivityId)
+                .OnDelete(DeleteBehavior.Restrict); // Don't cascade delete Activity -> DailyBurnTarget
+
         }
     }
 }

@@ -54,6 +54,7 @@ namespace Calibr8Fit.Api.Mappers
             return new ActivityRecord
             {
                 Id = requestDto.Id,
+                ActivityId = requestDto.ActivityId,
                 UserId = userId,
                 Duration = requestDto.Duration,
                 CaloriesBurned = requestDto.CaloriesBurned,

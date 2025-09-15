@@ -3,6 +3,7 @@ using System;
 using Calibr8Fit.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Calibr8Fit.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250915093447_AddDailyBurnTarget")]
+    partial class AddDailyBurnTarget
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -328,10 +331,7 @@ namespace Calibr8Fit.Api.Migrations
                     b.HasIndex("UserMealId")
                         .HasDatabaseName("ix_consumption_records_user_meal_id");
 
-                    b.ToTable("consumption_records", null, t =>
-                        {
-                            t.HasCheckConstraint("ck_consumption_record_food_id_user_meal_id", "(food_id IS NOT NULL) != (user_meal_id IS NOT NULL)");
-                        });
+                    b.ToTable("consumption_records", (string)null);
                 });
 
             modelBuilder.Entity("Calibr8Fit.Api.Models.DailyBurnTarget", b =>

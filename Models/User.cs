@@ -12,5 +12,6 @@ namespace Calibr8Fit.Api.Models
         public virtual ICollection<ConsumptionRecord>? ConsumptionRecords { get; set; } = [];
         public virtual ICollection<WaterIntakeRecord>? WaterIntakeRecords { get; set; } = [];
         public virtual ICollection<WeightRecord>? WeightRecords { get; set; } = [];
+        public virtual ICollection<DailyBurnTarget>? DailyBurnTargets { get; set; } = [];
     }
 }

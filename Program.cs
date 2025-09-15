@@ -74,6 +74,7 @@ builder.Services.AddUserSyncRepo<UserFood, Guid>();
 builder.Services.AddUserSyncRepo<WaterIntakeRecord, Guid>();
 builder.Services.AddUserSyncRepo<WeightRecord, Guid>();
 builder.Services.AddUserSyncRepo<UserMeal, Guid>();
+builder.Services.AddUserSyncRepo<DailyBurnTarget, Guid>();
 
 builder.Services.AddOpenApi("v1", options =>
 {

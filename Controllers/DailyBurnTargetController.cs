@@ -1,5 +1,5 @@
 using Calibr8Fit.Api.Controllers.Abstract;
-using Calibr8Fit.Api.DataTransferObjects.ActivityRecord;
+using Calibr8Fit.Api.DataTransferObjects.DailyBurnTarget;
 using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Mappers;
@@ -9,64 +9,66 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Calibr8Fit.Api.Controllers
 {
-    [Route("api/activity-record")]
+    [Route("api/daily-burn-target")]
     [ApiController]
     [Authorize]
-    public class ActivityRecordController(
-        IUserSyncRepositoryBase<ActivityRecord, Guid> activityRecordRepository,
+    public class DailyBurnTargetController(
+        IUserSyncRepositoryBase<DailyBurnTarget, Guid> dailyBurnTargetRepository,
         ICurrentUserService currentUserService,
-        ISyncService<ActivityRecord, Guid> syncService,
+        ISyncService<DailyBurnTarget, Guid> syncService,
         ITPHValidationService<Guid, Activity, UserActivity> activityValidationService
     ) : SyncableEntityControllerBase<
-        ActivityRecord,
-        ActivityRecordDto,
+        DailyBurnTarget,
+        DailyBurnTargetDto,
         Guid,
-        IUserSyncRepositoryBase<ActivityRecord, Guid>,
-        UpdateActivityRecordRequestDto,
-        AddActivityRecordRequestDto,
-        SyncActivityRecordRequestDto,
-        SyncActivityRecordResponseDto
+        IUserSyncRepositoryBase<DailyBurnTarget, Guid>,
+        UpdateDailyBurnTargetRequestDto,
+        AddDailyBurnTargetRequestDto,
+        SyncDailyBurnTargetRequestDto,
+        SyncDailyBurnTargetResponseDto
         >(
         currentUserService,
-        activityRecordRepository,
+        dailyBurnTargetRepository,
         syncService,
-        ActivityRecordMapper.ToActivityRecordDto,
-        ActivityRecordMapper.ToActivityRecord,
-        ActivityRecordMapper.ToActivityRecord,
-        ActivityRecordMapper.ToSyncActivityRecordResponseDto
+        DailyBurnTargetMapper.ToDailyBurnTargetDto,
+        DailyBurnTargetMapper.ToDailyBurnTarget,
+        DailyBurnTargetMapper.ToDailyBurnTarget,
+        DailyBurnTargetMapper.ToSyncDailyBurnTargetResponseDto
         )
     {
         private readonly ITPHValidationService<Guid, Activity, UserActivity> _activityValidationService = activityValidationService;
 
         [HttpPost("sync")]
-        public override Task<IActionResult> Sync([FromBody] SyncActivityRecordRequestDto requestDto) =>
+        public override Task<IActionResult> Sync([FromBody] SyncDailyBurnTargetRequestDto requestDto) =>
             WithUserId(async userId =>
             {
-                // Validate activity record links
-                foreach (var record in requestDto.ActivityRecords)
+                // Validate daily burn target links
+                foreach (var target in requestDto.DailyBurnTargets)
                 {
                     // Check if activity exists
-                    if (!await _activityValidationService.ValidateUserAccessAsync(userId, record.ActivityId))
-                        return BadRequest($"Activity with id: {record.ActivityId} does not exist for user.");
+                    if (!await _activityValidationService.ValidateUserAccessAsync(userId, target.ActivityId))
+                        return BadRequest($"Activity with id: {target.ActivityId} does not exist for user.");
                 }
 
                 return await base.Sync(requestDto);
             });
+
         [HttpPost]
-        public override Task<IActionResult> Add([FromBody] AddActivityRecordRequestDto requestDto) =>
+        public override Task<IActionResult> Add([FromBody] AddDailyBurnTargetRequestDto requestDto) =>
             WithUserId(async userId =>
             {
-                // Validate activity record link
+                // Validate daily burn target link
                 if (!await _activityValidationService.ValidateUserAccessAsync(userId, requestDto.ActivityId))
                     return BadRequest($"Activity with id: {requestDto.ActivityId} does not exist for user.");
 
                 return await base.Add(requestDto);
             });
+
         [HttpPut]
-        public override Task<IActionResult> Update([FromBody] UpdateActivityRecordRequestDto requestDto) =>
+        public override Task<IActionResult> Update([FromBody] UpdateDailyBurnTargetRequestDto requestDto) =>
             WithUserId(async userId =>
             {
-                // Validate activity record link
+                // Validate daily burn target link
                 if (!await _activityValidationService.ValidateUserAccessAsync(userId, requestDto.ActivityId))
                     return BadRequest($"Activity with id: {requestDto.ActivityId} does not exist for user.");
 
