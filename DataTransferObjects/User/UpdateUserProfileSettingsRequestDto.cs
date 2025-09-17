@@ -13,5 +13,6 @@ namespace Calibr8Fit.Api.DataTransferObjects.User
         public float? Height { get; set; }
         public UserActivityLevel? ActivityLevel { get; set; }
         public UserClimate? Climate { get; set; }
+        public string? ProfilePictureFileName { get; set; }
     }
 }

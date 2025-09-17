@@ -84,12 +84,12 @@ namespace Calibr8Fit.Api.Services
             // Check username
             var user = await _userManager.Users.FirstOrDefaultAsync(x => x.UserName == loginDto.UserName);
             if (user is null || !(await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false)).Succeeded)
-                return Result<TokenDto>.Failure([unauthorizedMessage]);
+                return Result<TokenDto>.Failure(unauthorizedMessage);
 
             // Check password
             var signInResult = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
             if (!signInResult.Succeeded)
-                return Result<TokenDto>.Failure([unauthorizedMessage]);
+                return Result<TokenDto>.Failure(unauthorizedMessage);
 
             // Retrieve roles
             var roles = await _userManager.GetRolesAsync(user);
@@ -102,17 +102,17 @@ namespace Calibr8Fit.Api.Services
             var principal = _tokenService.GetPrincipalFromToken(tokenRequestDto.OldAccessToken);
             var userName = principal?.Identity?.Name;
             if (userName is null)
-                return Result<TokenDto>.Failure(["Invalid token."]);
+                return Result<TokenDto>.Failure("Invalid token.");
 
             // Find user in DB
             var user = await _userManager.Users.FirstOrDefaultAsync(x => x.UserName == userName);
             if (user is null)
-                return Result<TokenDto>.Failure(["User not found."]);
+                return Result<TokenDto>.Failure("User not found.");
 
             // Validate token
             var storedToken = await _refreshTokenRepo.GetAsync([user.Id, tokenRequestDto.DeviceId]);
             if (storedToken is null || !_tokenService.VerifyRefreshToken(tokenRequestDto.RefreshToken, storedToken.TokenHash))
-                return Result<TokenDto>.Failure(["Invalid refresh token."]);
+                return Result<TokenDto>.Failure("Invalid refresh token.");
 
             // Retrieve user roles
             var roles = await _userManager.GetRolesAsync(user);

@@ -15,5 +15,7 @@ namespace Calibr8Fit.Api.Models
         public float Height { get; set; } = 0.0f;
         public UserActivityLevel ActivityLevel { get; set; } = UserActivityLevel.Sedentary;
         public UserClimate Climate { get; set; } = UserClimate.Temperate;
+        public string? ProfilePictureFileName { get; set; }
+        public virtual ICollection<ProfilePicture>? ProfilePictures { get; set; }
     }
 }

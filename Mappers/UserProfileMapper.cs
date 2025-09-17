@@ -5,11 +5,21 @@ namespace Calibr8Fit.Api.Mappers
 {
     public static class UserProfileMapper
     {
+        public static UserSummaryDto ToUserSummaryDto(this User user, string? profilePictureUrl)
+        {
+            return new UserSummaryDto
+            {
+                UserName = user.UserName!,
+                FirstName = user.Profile!.FirstName,
+                LastName = user.Profile!.LastName,
+                ProfilePictureUrl = profilePictureUrl
+            };
+        }
         public static UserProfileSettingsDto ToUserProfileSettingsDto(this User user)
         {
             return new UserProfileSettingsDto
             {
-                UserName = user.UserName,
+                UserName = user.UserName!,
                 FirstName = user.Profile!.FirstName,
                 LastName = user.Profile!.LastName,
                 DateOfBirth = user.Profile!.DateOfBirth,
@@ -21,13 +31,14 @@ namespace Calibr8Fit.Api.Mappers
                 Climate = user.Profile!.Climate
             };
         }
-        public static UserProfileDto ToUserProfileDto(this User user)
+        public static UserProfileDto ToUserProfileDto(this User user, string? profilePictureUrl)
         {
             return new UserProfileDto
             {
-                UserName = user.UserName,
+                UserName = user.UserName!,
                 FirstName = user.Profile!.FirstName,
                 LastName = user.Profile!.LastName,
+                ProfilePictureUrl = profilePictureUrl
             };
         }
         public static UserProfile ToUserProfile(this UpdateUserProfileSettingsRequestDto dto, User user)

@@ -5,6 +5,7 @@ using Calibr8Fit.Api.Interfaces.Repository;
 using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Models;
+using Calibr8Fit.Api.Options;
 using Calibr8Fit.Api.Repository;
 using Calibr8Fit.Api.Repository.Base;
 using Calibr8Fit.Api.Services;
@@ -47,20 +48,29 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection("Storage"));
 
 // Services
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<ITPHValidationService<Guid, Activity, UserActivity>, TPHValidationService<Guid, Activity, UserActivity>>();
 builder.Services.AddScoped<ITPHValidationService<Guid, Food, UserFood>, TPHValidationService<Guid, Food, UserFood>>();
+builder.Services.AddScoped<IFriendshipService, FriendshipService>();
+builder.Services.AddScoped<IPathService, PathService>();
+builder.Services.AddScoped<IFileService, FileService>();
 
 // Repositories
-builder.Services.AddScoped<IDataVersionRepository, DataVersionRepository>();
-builder.Services.AddScoped<IUserRepositoryBase<RefreshToken, string[]>, RefreshTokenRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserRepositoryBase<RefreshToken, string[]>, UserRepositoryBase<RefreshToken, string[]>>();
 builder.Services.AddScoped<IRepositoryBase<UserProfile, string>, RepositoryBase<UserProfile, string>>();
+builder.Services.AddScoped<IUserRepositoryBase<ProfilePicture, string[]>, UserRepositoryBase<ProfilePicture, string[]>>();
+builder.Services.AddScoped<IDataVersionRepository, DataVersionRepository>();
 builder.Services.AddScoped<IRepositoryBase<Activity, Guid>, RepositoryBase<Activity, Guid>>();
 builder.Services.AddScoped<IRepositoryBase<Food, Guid>, RepositoryBase<Food, Guid>>();
+builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+builder.Services.AddScoped<IRepositoryBase<FriendRequest, string[]>, RepositoryBase<FriendRequest, string[]>>();
 
 // Data Version Repositories
 builder.Services.AddDataVersionRepo<Food, Guid>(DataResource.Foods);
@@ -91,6 +101,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
 app.MapControllers();
 

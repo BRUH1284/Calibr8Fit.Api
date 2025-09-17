@@ -1,8 +1,10 @@
+using System.Linq.Expressions;
 using Calibr8Fit.Api.Data;
 using Calibr8Fit.Api.Interfaces.Model;
 using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Microsoft.EntityFrameworkCore;
 
+// TODO: Cancellation tokens
 namespace Calibr8Fit.Api.Repository.Base
 {
     public class RepositoryBase<T, HT, TKey>(
@@ -16,12 +18,12 @@ namespace Calibr8Fit.Api.Repository.Base
         protected readonly DbSet<T> _dbSet = context.Set<T>();
         protected readonly DbSet<HT> _hDbSet = context.Set<HT>();
 
-        public virtual ValueTask<T?> GetAsync(TKey key)
+        public virtual ValueTask<T?> GetAsync(params object?[] keyValues)
         {
             // Get entity by key
-            return _dbSet.FindAsync(key);
+            return _dbSet.FindAsync(keyValues);
         }
-        public async ValueTask<List<T>> GetRangeAsync(IEnumerable<TKey> keys)
+        public async Task<List<T>> GetRangeAsync(IEnumerable<TKey> keys)
         {
             // If no keys provided, return empty list
             if (!keys.Any()) return [];
@@ -38,15 +40,16 @@ namespace Calibr8Fit.Api.Repository.Base
             return _dbSet.ToListAsync();
         }
 
-        public virtual Task<bool> KeyExistsAsync(TKey key)
+        public virtual async Task<bool> KeyExistsAsync(params object?[] keyValues)
         {
             // Check if entity exists by key
-            return _dbSet.AnyAsync(e => e.Id.Equals(key));
+            return await _dbSet.FindAsync(keyValues) is not null;
         }
         public virtual async Task<T?> AddAsync(T entity)
         {
+            var keyValues = GetPrimaryKeyValues(entity);
             // Check if entity already exists
-            if (await KeyExistsInHierarchyAsync(entity.Id)) return null;
+            if (await KeyExistsInHierarchyAsync(keyValues)) return null;
 
             if (typeof(TKey) == typeof(int) && entity.Id.Equals(default(TKey)))
             {
@@ -142,10 +145,10 @@ namespace Calibr8Fit.Api.Repository.Base
             return existingEntities;
         }
 
-        public virtual async Task<T?> DeleteAsync(TKey key)
+        public virtual async Task<T?> DeleteAsync(params object?[] keyValues)
         {
             // Get existing entity by key
-            var existing = await GetAsync(key);
+            var existing = await GetAsync(keyValues);
 
             // Remove entity if it exists
             return await RemoveEntityAsync(existing);
@@ -162,10 +165,10 @@ namespace Calibr8Fit.Api.Repository.Base
             // Remove range of entities
             return await RemoveEntityRangeAsync(existingEntities);
         }
-        public virtual async Task<bool> KeyExistsInHierarchyAsync(TKey key)
+        public virtual async Task<bool> KeyExistsInHierarchyAsync(params object?[] keyValues)
         {
             // Check if the hierarchy key exists in the database
-            return await _hDbSet.FindAsync(key) is not null;
+            return await _hDbSet.FindAsync(keyValues) is not null;
         }
 
         public virtual Task<List<TKey>> KeyRangeExistsInHierarchyAsync(IEnumerable<TKey> keys)
@@ -178,14 +181,81 @@ namespace Calibr8Fit.Api.Repository.Base
         }
 
 
-
-        protected virtual ValueTask<T?> GetEntityAsync(T entity)
+        protected virtual IQueryable<T> QueryBase(bool asNoTracking = true)
         {
-            // Get entity by id
-            return _dbSet.FindAsync(entity.Id);
+            // Return queryable for the entity set
+            return asNoTracking ? _dbSet.AsNoTracking() : _dbSet.AsQueryable();
         }
 
-        protected virtual ValueTask<List<T>> GetEntityRangeAsync(IEnumerable<T> entities)
+        protected virtual IQueryable<T> ApplyIncludes(
+            IQueryable<T> query,
+            params Expression<Func<T, object>>[] includes)
+        {
+            if (includes is null) return query;
+            foreach (var include in includes)
+                query = query.Include(include);
+            return query;
+        }
+
+        public virtual Task<List<T>> QueryAsync(
+            Func<IQueryable<T>, IQueryable<T>> configure,
+            bool asNoTracking = true)
+        {
+            var q = QueryBase(asNoTracking);
+            q = configure(q);
+            return q.ToListAsync();
+        }
+
+        public virtual Task<T?> QuerySingleAsync(
+            Func<IQueryable<T>, IQueryable<T>> configure,
+            bool asNoTracking = true)
+        {
+            var q = QueryBase(asNoTracking);
+            q = configure(q);
+            return q.FirstOrDefaultAsync();
+        }
+
+        public virtual Task<List<TOut>> QueryProjectedAsync<TOut>(
+            Func<IQueryable<T>, IQueryable<TOut>> configure,
+            bool asNoTracking = true)
+        {
+            var q = QueryBase(asNoTracking);
+            var shaped = configure(q);
+            return shaped.ToListAsync();
+        }
+
+        public virtual Task<bool> AnyAsync(
+            Expression<Func<T, bool>> predicate)
+            => _dbSet.AnyAsync(predicate);
+
+        public virtual Task<int> CountAsync(
+            Expression<Func<T, bool>>? predicate = null)
+            => predicate is null
+                ? _dbSet.CountAsync()
+                : _dbSet.CountAsync(predicate);
+
+
+        // Helper methods
+        protected virtual object?[] GetPrimaryKeyValues(T entity)
+        {
+            var key = _dbSet.EntityType
+                .FindPrimaryKey()
+                ?.Properties
+                .Select(p => entity.GetType().GetProperty(p.Name)?.GetValue(entity))
+                .ToArray();
+
+            if (key is null)
+                throw new InvalidOperationException($"No primary key defined for {typeof(T).Name}");
+
+            return key;
+        }
+        protected virtual ValueTask<T?> GetEntityAsync(T entity)
+        {
+            // Get entity by primary key values
+            return _dbSet.FindAsync(GetPrimaryKeyValues(entity));
+        }
+
+        protected virtual Task<List<T>> GetEntityRangeAsync(IEnumerable<T> entities)
         {
             // Get range of entities
             return GetRangeAsync(entities.Select(e => e.Id));

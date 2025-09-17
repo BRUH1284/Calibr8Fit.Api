@@ -4,15 +4,15 @@ namespace Calibr8Fit.Api.DataTransferObjects.User
 {
     public class UserProfileSettingsDto
     {
-        public string? UserName { get; set; }
-        public string? FirstName { get; set; }
-        public string? LastName { get; set; }
-        public DateTime? DateOfBirth { get; set; }
-        public Gender? Gender { get; set; }
-        public float? Weight { get; set; }
-        public float? TargetWeight { get; set; }
-        public float? Height { get; set; }
-        public UserActivityLevel? ActivityLevel { get; set; }
-        public UserClimate? Climate { get; set; }
+        public required string UserName { get; set; }
+        public required string FirstName { get; set; }
+        public required string LastName { get; set; }
+        public required DateTime DateOfBirth { get; set; }
+        public required Gender Gender { get; set; }
+        public required float Weight { get; set; }
+        public required float TargetWeight { get; set; }
+        public required float Height { get; set; }
+        public required UserActivityLevel ActivityLevel { get; set; }
+        public required UserClimate Climate { get; set; }
     }
 }

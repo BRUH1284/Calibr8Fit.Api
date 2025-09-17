@@ -24,6 +24,9 @@ namespace Calibr8Fit.Api.Data
         public DbSet<UserMeal> UserMeals { get; set; }
         public DbSet<UserMealItem> UserMealItems { get; set; }
         public DbSet<DailyBurnTarget> DailyBurnTargets { get; set; }
+        public DbSet<FriendRequest> FriendRequests { get; set; }
+        public DbSet<Friendship> Friendships { get; set; }
+        public DbSet<ProfilePicture> ProfilePictures { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -55,6 +58,19 @@ namespace Calibr8Fit.Api.Data
                 .HasForeignKey<UserProfile>(p => p.Id)
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> UserProfile
 
+            // Configure ProfilePicture
+            builder.Entity<ProfilePicture>()
+                .HasKey(pp => new { pp.UserId, pp.FileName }); // Composite key
+
+            builder.Entity<ProfilePicture>()
+                .HasOne<UserProfile>()
+                .WithMany(up => up.ProfilePictures) // UserProfiles can have many ProfilePictures
+                .HasForeignKey(pp => pp.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for UserProfile -> ProfilePicture
+
+            builder.Entity<ProfilePicture>()
+                .HasIndex(pp => pp.UserId); // Index on UserId for efficient lookups
+
             // Configure RefreshToken
             builder.Entity<RefreshToken>()
                 .HasKey(rt => new { rt.UserId, rt.DeviceId }); // Composite key
@@ -81,6 +97,9 @@ namespace Calibr8Fit.Api.Data
                 .HasIndex(ua => new { ua.UserId, ua.Id }); // Composite index for UserId and and Id
 
             builder.Entity<UserActivity>()
+                .HasIndex(ua => ua.UserId); // Index on UserId for efficient look
+
+            builder.Entity<UserActivity>()
                 .HasOne(ua => ua.User)
                 .WithMany(u => u.UserActivities) // User can have many UserActivities
                 .HasForeignKey(ua => ua.UserId)
@@ -100,6 +119,9 @@ namespace Calibr8Fit.Api.Data
             // Configure UserFood
             builder.Entity<UserFood>()
                 .HasIndex(uf => new { uf.UserId, uf.Id }); // Composite index for UserId and and Id
+
+            builder.Entity<UserFood>()
+                .HasIndex(uf => uf.UserId); // Index on UserId for efficient lookups
 
             builder.Entity<UserFood>()
                 .HasOne(uf => uf.User)
@@ -128,6 +150,9 @@ namespace Calibr8Fit.Api.Data
                 .HasForeignKey(cr => cr.UserId)
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> ConsumptionRecord
 
+            builder.Entity<ConsumptionRecord>()
+                .HasIndex(cr => cr.UserId); // Index on UserId for efficient lookups
+
             // Configure ConsumptionRecord -> Food relationship
             builder.Entity<ConsumptionRecord>()
                 .HasOne(cr => cr.Food)
@@ -149,6 +174,9 @@ namespace Calibr8Fit.Api.Data
                 .HasForeignKey(wir => wir.UserId)
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> WaterIntakeRecord
 
+            builder.Entity<WaterIntakeRecord>()
+                .HasIndex(wir => wir.UserId); // Index on UserId for efficient look
+
             // Configure WeightRecord
             builder.Entity<WeightRecord>()
                 .HasOne(wr => wr.User)
@@ -156,12 +184,18 @@ namespace Calibr8Fit.Api.Data
                 .HasForeignKey(wr => wr.UserId)
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> WeightRecord
 
+            builder.Entity<WeightRecord>()
+                .HasIndex(wr => wr.UserId); // Index on UserId for efficient lookups
+
             // Configure UserMeal
             builder.Entity<UserMeal>()
                 .HasOne(um => um.User)
                 .WithMany(u => u.UserMeals) // User can have many UserMeals
                 .HasForeignKey(um => um.UserId)
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> UserMeal
+
+            builder.Entity<UserMeal>()
+                .HasIndex(um => um.UserId); // Index on UserId for efficient lookups
 
             // Configure UserMealItem
             builder.Entity<UserMealItem>()
@@ -197,6 +231,53 @@ namespace Calibr8Fit.Api.Data
                 .HasForeignKey(dbt => dbt.ActivityId)
                 .OnDelete(DeleteBehavior.Restrict); // Don't cascade delete Activity -> DailyBurnTarget
 
+            builder.Entity<DailyBurnTarget>()
+                .HasIndex(dbt => dbt.UserId); // Index on UserId for efficient lookups
+
+            // Configure FriendRequest
+            builder.Entity<FriendRequest>()
+                .HasKey(fr => new { fr.RequesterId, fr.AddresseeId }); // Composite key
+
+            builder.Entity<FriendRequest>()
+                .HasOne(fr => fr.Requester)
+                .WithMany(u => u.SentFriendRequests) // User can have many sent FriendRequests
+                .HasForeignKey(fr => fr.RequesterId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> FriendRequest
+
+            builder.Entity<FriendRequest>()
+                .HasOne(fr => fr.Addressee)
+                .WithMany(u => u.ReceivedFriendRequests) // User can have many received FriendRequests
+                .HasForeignKey(fr => fr.AddresseeId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> FriendRequest
+
+            builder.Entity<FriendRequest>()
+                .HasIndex(fr => fr.AddresseeId); // Index on AddresseeId for efficient lookups
+
+            builder.Entity<FriendRequest>()
+                .HasIndex(fr => fr.RequesterId); // Index on RequesterId for efficient lookups
+
+            // Configure Friendship
+            builder.Entity<Friendship>()
+                .HasKey(f => new { f.UserAId, f.UserBId }); // Composite key
+
+            builder.Entity<User>()
+                .HasMany(u => u.Friends)
+                .WithMany()
+                .UsingEntity<Friendship>(
+                    j => j.HasOne(f => f.UserB)
+                          .WithMany()
+                          .HasForeignKey(f => f.UserBId)
+                          .OnDelete(DeleteBehavior.Cascade),
+                    j => j.HasOne(f => f.UserA)
+                          .WithMany()
+                          .HasForeignKey(f => f.UserAId)
+                          .OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey(f => new { f.UserAId, f.UserBId }); // Composite key
+                        j.HasIndex(f => f.UserBId); // Index on UserBId
+                        j.HasIndex(f => f.UserAId); // Index on UserAId
+                    });
         }
     }
 }
