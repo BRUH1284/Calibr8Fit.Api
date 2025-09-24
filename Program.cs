@@ -11,6 +11,8 @@ using Calibr8Fit.Api.Repository.Base;
 using Calibr8Fit.Api.Services;
 using Calibr8Fit.Api.Validators;
 using DotNetEnv;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -50,8 +52,15 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection("Storage"));
 
+// Firebase
+var credential = GoogleCredential.FromFile(Environment.GetEnvironmentVariable("FirebaseCredentialPath"));
+FirebaseApp.Create(new AppOptions { Credential = credential });
+
+builder.Services.AddHttpContextAccessor();
+
 // Services
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IPushService, PushService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
@@ -64,6 +73,7 @@ builder.Services.AddScoped<IFileService, FileService>();
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserRepositoryBase<RefreshToken, string[]>, UserRepositoryBase<RefreshToken, string[]>>();
+builder.Services.AddScoped<IUserRepositoryBase<PushToken, string[]>, UserRepositoryBase<PushToken, string[]>>();
 builder.Services.AddScoped<IRepositoryBase<UserProfile, string>, RepositoryBase<UserProfile, string>>();
 builder.Services.AddScoped<IUserRepositoryBase<ProfilePicture, string[]>, UserRepositoryBase<ProfilePicture, string[]>>();
 builder.Services.AddScoped<IDataVersionRepository, DataVersionRepository>();

@@ -4,19 +4,16 @@ using Calibr8Fit.Api.Interfaces.Service;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Calibr8Fit.Api.Controllers.Abstract;
-using Calibr8Fit.Api.Interfaces.Repository.Base;
-using Calibr8Fit.Api.Models;
+
 namespace Calibr8Fit.Api.Controllers
 {
     [Route("api/auth")]
     [ApiController]
     public class AuthController(
-        IUserRepositoryBase<RefreshToken, string[]> refreshTokenRepo,
         IAuthService authService,
         ICurrentUserService currentUserService
         ) : UserControllerBase(currentUserService)
     {
-        private readonly IUserRepositoryBase<RefreshToken, string[]> _refreshTokenRepo = refreshTokenRepo;
         private readonly IAuthService _authService = authService;
 
         [HttpPost("register")]
@@ -51,20 +48,20 @@ namespace Calibr8Fit.Api.Controllers
         public Task<IActionResult> Logout([FromQuery] string deviceId) =>
             WithUser(async user =>
             {
-                // Delete refresh token for user and device
-                return await _refreshTokenRepo.DeleteAsync([user.Id, deviceId]) is null
-                    ? NotFound("Refresh token not found for this user and device.")
-                    : NoContent();
+                var result = await _authService.LogoutAsync(user.Id, deviceId);
+                return result.Succeeded
+                    ? NoContent()
+                    : NotFound(result.Errors);
             });
         [HttpPost("logout-all")]
         [Authorize]
         public Task<IActionResult> LogoutAll() =>
             WithUser(async user =>
             {
-                // Delete all refresh tokens for user
-                return await _refreshTokenRepo.DeleteAllByUserIdAsync(user.Id) is null
-                    ? NotFound("No refresh tokens found for this user.")
-                    : NoContent();
+                var result = await _authService.LogoutAllAsync(user.Id);
+                return result.Succeeded
+                    ? NoContent()
+                    : NotFound(result.Errors);
             });
     }
 }

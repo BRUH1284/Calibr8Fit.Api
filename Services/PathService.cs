@@ -4,8 +4,12 @@ using Microsoft.Extensions.Options;
 
 namespace Calibr8Fit.Api.Services
 {
-    public class PathService(IOptions<StorageOptions> options) : IPathService
+    public class PathService(
+        IHttpContextAccessor httpContextAccessor,
+        IOptions<StorageOptions> options
+        ) : IPathService
     {
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly StorageOptions _options = options.Value;
 
         private static string EnsureDirectoryExists(string path)
@@ -35,11 +39,11 @@ namespace Calibr8Fit.Api.Services
             // Return path if it exists
             return File.Exists(path) ? path : null;
         }
-        public string? GetProfilePictureUrl(HttpRequest httpRequest, string username, string fileName)
+        public string? GetProfilePictureUrl(string username, string fileName)
         {
             var path = GetProfilePicturePath(username, fileName);
             // If path exists return public url
-            return path == null ? null : BuildPublicUrl(httpRequest, path);
+            return path == null ? null : BuildPublicUrl(path);
         }
         public string GetPostImagesDirectoryPath(string username, int postId) =>
             EnsureDirectoryExists(Path.Combine(
@@ -58,12 +62,12 @@ namespace Calibr8Fit.Api.Services
             // Return path if it exists
             return File.Exists(path) ? path : null;
         }
-        public string? GetPostImageUrl(HttpRequest httpRequest, string username, int postId, string fileName)
+        public string? GetPostImageUrl(string username, int postId, string fileName)
         {
             var path = GetPostImagePath(username, postId, fileName);
 
             // If path exists return public url
-            return path == null ? null : BuildPublicUrl(httpRequest, path);
+            return path == null ? null : BuildPublicUrl(path);
         }
         public string RemoveRoot(string path) =>
             path.StartsWith(_options.RootPath) ?
@@ -73,8 +77,14 @@ namespace Calibr8Fit.Api.Services
             path.StartsWith(_options.RootPath) ?
                 path :
                 Path.Combine(_options.RootPath, path);
-        public string BuildPublicUrl(HttpRequest request, string relativePath)
+        public string BuildPublicUrl(string relativePath)
         {
+            // Get current HTTP request
+            var request = _httpContextAccessor.HttpContext?.Request;
+
+            if (request is null)
+                throw new InvalidOperationException("No active HTTP request context.");
+
             // Normalize path and remove leading "wwwroot/" if present
             var cleanedPath = relativePath.Replace("\\", "/");
             if (cleanedPath.StartsWith(_options.RootPath))

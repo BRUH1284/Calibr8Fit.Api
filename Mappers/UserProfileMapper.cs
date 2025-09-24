@@ -1,4 +1,5 @@
 using Calibr8Fit.Api.DataTransferObjects.User;
+using Calibr8Fit.Api.Enums;
 using Calibr8Fit.Api.Models;
 
 namespace Calibr8Fit.Api.Mappers
@@ -15,7 +16,7 @@ namespace Calibr8Fit.Api.Mappers
                 ProfilePictureUrl = profilePictureUrl
             };
         }
-        public static UserProfileSettingsDto ToUserProfileSettingsDto(this User user)
+        public static UserProfileSettingsDto ToUserProfileSettingsDto(this User user, string? profilePictureUrl)
         {
             return new UserProfileSettingsDto
             {
@@ -28,19 +29,32 @@ namespace Calibr8Fit.Api.Mappers
                 TargetWeight = user.Profile!.TargetWeight,
                 Height = user.Profile!.Height,
                 ActivityLevel = user.Profile!.ActivityLevel,
-                Climate = user.Profile!.Climate
+                Climate = user.Profile!.Climate,
+                ProfilePictureUrl = profilePictureUrl
             };
         }
-        public static UserProfileDto ToUserProfileDto(this User user, string? profilePictureUrl)
+        public static UserProfileDto ToUserProfileDto(
+            this User user,
+            string? profilePictureUrl,
+            int friendsCount,
+            int followersCount,
+            int followingCount,
+            FriendshipStatus friendshipStatus)
         {
             return new UserProfileDto
             {
                 UserName = user.UserName!,
                 FirstName = user.Profile!.FirstName,
                 LastName = user.Profile!.LastName,
-                ProfilePictureUrl = profilePictureUrl
+                ProfilePictureUrl = profilePictureUrl,
+                Bio = "",
+                FriendsCount = friendsCount,
+                FollowersCount = followersCount,
+                FollowingCount = followingCount,
+                FriendshipStatus = friendshipStatus
             };
         }
+        //TODO: may break profile picture
         public static UserProfile ToUserProfile(this UpdateUserProfileSettingsRequestDto dto, User user)
         {
             return new UserProfile

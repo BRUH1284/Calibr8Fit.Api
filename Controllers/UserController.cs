@@ -24,7 +24,7 @@ namespace Calibr8Fit.Api.Controllers
 
         [HttpGet("me")]
         public Task<IActionResult> GetMySummary() =>
-            WithUser(user => Ok(user.ToUserSummaryDto(user.GetProfilePictureUrl(Request, _pathService))));
+            WithUser(user => Ok(user.ToUserSummaryDto(user.GetProfilePictureUrl(_pathService))));
 
         [HttpGet("search")]
         public async Task<IActionResult> SearchUsers([FromQuery] string query)
@@ -34,7 +34,7 @@ namespace Calibr8Fit.Api.Controllers
 
             var users = await _userRepo.SearchByUsernameAsync(query);
 
-            var result = users.Select(u => u.ToUserSummaryDto(u.GetProfilePictureUrl(Request, _pathService)));
+            var result = users.Select(u => u.ToUserSummaryDto(u.GetProfilePictureUrl(_pathService)));
 
             return Ok(result);
         }
@@ -46,7 +46,7 @@ namespace Calibr8Fit.Api.Controllers
             if (user is null) return NotFound();
 
             // Return user summary
-            return Ok(user.ToUserSummaryDto(user.GetProfilePictureUrl(Request, _pathService)));
+            return Ok(user.ToUserSummaryDto(user.GetProfilePictureUrl(_pathService)));
         }
         [HttpDelete("me")]
         public Task<IActionResult> DeleteMe() =>

@@ -1,6 +1,5 @@
 using Calibr8Fit.Api.Controllers.Abstract;
 using Calibr8Fit.Api.Interfaces.Service;
-using Calibr8Fit.Api.Mappers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,22 +10,20 @@ namespace Calibr8Fit.Api.Controllers
     [Authorize]
     public class FriendshipController(
         ICurrentUserService currentUserService,
-        IFriendshipService friendshipService,
-        IPathService pathService
+        IFriendshipService friendshipService
         ) : UserControllerBase(currentUserService)
     {
         private readonly IFriendshipService _friendshipService = friendshipService;
-        private readonly IPathService _pathService = pathService;
 
         [HttpPost("request/{addresseeUsername}")]
         public Task<IActionResult> SendFriendRequest(string addresseeUsername) =>
             WithUserId(async userId =>
             {
                 var result = await _friendshipService.SendFriendRequestAsync(userId, addresseeUsername);
-                if (!result.Succeeded)
-                    return BadRequest(new { errors = result.Errors });
 
-                return Ok(result.Data!.ToFriendRequestDto(Request, _pathService));
+                return result.Succeeded
+                    ? Ok(result.Data)
+                    : BadRequest(new { errors = result.Errors });
             });
 
         [HttpPost("request/{requesterUsername}/accept")]
@@ -34,10 +31,10 @@ namespace Calibr8Fit.Api.Controllers
             WithUserId(async userId =>
             {
                 var result = await _friendshipService.AcceptFriendRequestAsync(userId, requesterUsername);
-                if (!result.Succeeded)
-                    return BadRequest(new { errors = result.Errors });
 
-                return Ok(result.Data!.ToFriendshipDto(userId, Request, _pathService));
+                return result.Succeeded
+                    ? Ok(result.Data)
+                    : BadRequest(new { errors = result.Errors });
             });
 
         [HttpDelete("request/{requesterUsername}/reject")]
@@ -45,10 +42,10 @@ namespace Calibr8Fit.Api.Controllers
             WithUserId(async userId =>
             {
                 var result = await _friendshipService.RejectFriendRequestAsync(userId, requesterUsername);
-                if (!result.Succeeded)
-                    return BadRequest(new { errors = result.Errors });
 
-                return Ok(new { message = "Friend request rejected" });
+                return result.Succeeded
+                    ? Ok(new { message = "Friend request rejected" })
+                    : BadRequest(new { errors = result.Errors });
             });
 
         [HttpDelete("request/{addresseeUsername}/cancel")]
@@ -56,10 +53,10 @@ namespace Calibr8Fit.Api.Controllers
             WithUserId(async userId =>
             {
                 var result = await _friendshipService.CancelFriendRequestAsync(userId, addresseeUsername);
-                if (!result.Succeeded)
-                    return BadRequest(new { errors = result.Errors });
 
-                return Ok(new { message = "Friend request cancelled" });
+                return result.Succeeded
+                    ? Ok(new { message = "Friend request cancelled" })
+                    : BadRequest(new { errors = result.Errors });
             });
 
         [HttpGet("requests/pending")]
@@ -67,7 +64,7 @@ namespace Calibr8Fit.Api.Controllers
             WithUserId(async userId =>
             {
                 var requests = await _friendshipService.GetPendingFriendRequestsAsync(userId);
-                return Ok(requests.ToFriendRequestDtos(Request, _pathService));
+                return Ok(requests);
             });
 
         [HttpGet("requests/sent")]
@@ -75,7 +72,7 @@ namespace Calibr8Fit.Api.Controllers
             WithUserId(async userId =>
             {
                 var requests = await _friendshipService.GetSentFriendRequestsAsync(userId);
-                return Ok(requests.ToFriendRequestDtos(Request, _pathService));
+                return Ok(requests);
             });
 
         // Friendship Management
@@ -85,10 +82,10 @@ namespace Calibr8Fit.Api.Controllers
             WithUser(async user =>
             {
                 var result = await _friendshipService.RemoveFriendshipAsync(user.UserName!, friendUsername);
-                if (!result.Succeeded)
-                    return BadRequest(new { errors = result.Errors });
 
-                return Ok(new { message = "Friendship removed" });
+                return result.Succeeded
+                    ? Ok(new { message = "Friendship removed" })
+                    : BadRequest(new { errors = result.Errors });
             });
 
         [HttpGet("{username}/are-friends")]
@@ -104,7 +101,7 @@ namespace Calibr8Fit.Api.Controllers
             WithUserId(async userId =>
             {
                 var friendships = await _friendshipService.GetUserFriendshipsAsync(userId);
-                return Ok(friendships.ToFriendshipDtos(userId, Request, _pathService));
+                return Ok(friendships);
             });
     }
 }

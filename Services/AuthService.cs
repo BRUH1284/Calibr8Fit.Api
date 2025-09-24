@@ -14,6 +14,7 @@ namespace Calibr8Fit.Api.Services
         SignInManager<User> signInManager,
         ITokenService tokenService,
         IUserRepositoryBase<RefreshToken, string[]> refreshTokenRepo,
+        IUserRepositoryBase<PushToken, string[]> pushTokenRepo,
         IRepositoryBase<UserProfile, string> userProfileRepo
         ) : IAuthService
     {
@@ -21,6 +22,7 @@ namespace Calibr8Fit.Api.Services
         private readonly SignInManager<User> _signInManager = signInManager;
         private readonly ITokenService _tokenService = tokenService;
         private readonly IUserRepositoryBase<RefreshToken, string[]> _refreshTokenRepo = refreshTokenRepo;
+        private readonly IUserRepositoryBase<PushToken, string[]> _pushTokenRepo = pushTokenRepo;
         private readonly IRepositoryBase<UserProfile, string> _userProfileRepo = userProfileRepo;
 
         public async Task<IdentityResult<TokenDto>> RegisterUserAsync(RegisterDto registerDto)
@@ -118,6 +120,26 @@ namespace Calibr8Fit.Api.Services
             var roles = await _userManager.GetRolesAsync(user);
 
             return Result<TokenDto>.Success(await GetTokenDto(user, roles, tokenRequestDto.DeviceId));
+        }
+        public async Task<Result> LogoutAsync(string userId, string deviceId)
+        {
+            // Delete refresh token for user and device
+            if (await _refreshTokenRepo.DeleteAsync([userId, deviceId]) is null)
+                return Result.Failure("Refresh token not found for this user and device.");
+            // Delete push tokens for user and device
+            if (await _pushTokenRepo.DeleteAsync([userId, deviceId]) is null)
+                return Result.Failure("Push token not found for this user and device.");
+            return Result.Success();
+        }
+        public async Task<Result> LogoutAllAsync(string userId)
+        {
+            // Delete all refresh tokens for user
+            if (await _refreshTokenRepo.DeleteAllByUserIdAsync(userId) is null)
+                return Result.Failure("No refresh tokens found for this user.");
+            // Delete all push tokens for user
+            if (await _pushTokenRepo.DeleteAllByUserIdAsync(userId) is null)
+                return Result.Failure("No push tokens found for this user.");
+            return Result.Success();
         }
         private async Task<TokenDto> GetTokenDto(User user, IList<string> roles, string deviceId)
         {

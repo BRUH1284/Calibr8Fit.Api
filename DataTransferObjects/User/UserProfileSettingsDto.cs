@@ -14,5 +14,6 @@ namespace Calibr8Fit.Api.DataTransferObjects.User
         public required float Height { get; set; }
         public required UserActivityLevel ActivityLevel { get; set; }
         public required UserClimate Climate { get; set; }
+        public required string? ProfilePictureUrl { get; set; }
     }
 }

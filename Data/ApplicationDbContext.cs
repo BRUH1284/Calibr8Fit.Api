@@ -11,6 +11,7 @@ namespace Calibr8Fit.Api.Data
         public DbSet<DataVersion> DataVersions { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<PushToken> PushTokens { get; set; }
         public DbSet<ActivityBase> BaseActivities { get; set; }
         public DbSet<Food> BaseFood { get; set; }
         public DbSet<ActivityRecord> ActivityRecords { get; set; }
@@ -80,6 +81,16 @@ namespace Calibr8Fit.Api.Data
                 .WithMany() // User can have many RefreshTokens
                 .HasForeignKey(rt => rt.UserId)
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> RefreshToken
+
+            // Configure PushToken
+            builder.Entity<PushToken>()
+                .HasKey(pt => new { pt.UserId, pt.DeviceId }); // Composite key
+
+            builder.Entity<PushToken>()
+                .HasOne<User>()
+                .WithMany() // User can have many PushTokens
+                .HasForeignKey(pt => pt.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> PushToken
 
             // Configure BaseActivities
             builder.Entity<ActivityBase>()

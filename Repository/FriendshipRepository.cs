@@ -47,6 +47,9 @@ namespace Calibr8Fit.Api.Repository
                              .Cast<User>();
         }
 
+        public async Task<int> GetFriendsCountAsync(string userId) =>
+            await _dbSet.CountAsync(f => f.UserAId == userId || f.UserBId == userId);
+
         public async Task<IEnumerable<Friendship>> GetUserFriendshipsAsync(string userId) =>
             await _dbSet
                 .Include(f => f.UserA)

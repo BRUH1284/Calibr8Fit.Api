@@ -1,6 +1,8 @@
 using Calibr8Fit.Api.Controllers.Abstract;
 using Calibr8Fit.Api.DataTransferObjects.User;
+using Calibr8Fit.Api.Enums;
 using Calibr8Fit.Api.Extensions;
+using Calibr8Fit.Api.Interfaces.Repository;
 using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Mappers;
@@ -15,11 +17,15 @@ namespace Calibr8Fit.Api.Controllers
     public class UserProfileController(
         ICurrentUserService currentUserService,
         IRepositoryBase<UserProfile, string> userProfileRepository,
+        IUserRepository userRepository,
+        IFriendshipService friendshipService,
         IUserProfileService userProfileService,
         IPathService pathService
         ) : UserControllerBase(currentUserService)
     {
+        private readonly IUserRepository _userRepository = userRepository;
         private readonly IRepositoryBase<UserProfile, string> _userProfileRepository = userProfileRepository;
+        private readonly IFriendshipService _friendshipService = friendshipService;
         private readonly IUserProfileService _userProfileService = userProfileService;
         private readonly IPathService _pathService = pathService;
 
@@ -29,16 +35,46 @@ namespace Calibr8Fit.Api.Controllers
             WithUser(user =>
                 user?.Profile is null
                     ? Unauthorized("User profile not found.")
-                    : Ok(user.ToUserProfileDto(user.GetProfilePictureUrl(Request, _pathService)))
+                    : Ok(user.ToUserProfileDto(
+                        user.GetProfilePictureUrl(_pathService),
+                        _friendshipService.GetFriendsCountAsync(user.Id).Result,
+                        0,
+                        0,
+                        FriendshipStatus.None // Own profile, no friendship status
+                    ))
             );
+
+        [HttpGet("{username}")]
+        [Authorize]
+        public Task<IActionResult> GetUserProfileByUsername(string username) =>
+            WithUser(async u =>
+            {
+                var user = await _userRepository.GetByUsernameAsync(username);
+
+                if (user?.Profile is null)
+                    return NotFound($"User or user profile with {username} not found.");
+
+                var friendsCount = await _friendshipService.GetFriendsCountAsync(user.Id);
+                var friendshipStatus = await _friendshipService.GetFriendshipStatusAsync(u.UserName!, username);
+
+                return Ok(user.ToUserProfileDto(
+                    user.GetProfilePictureUrl(_pathService),
+                    friendsCount,
+                    0,
+                    0,
+                    friendshipStatus
+                ));
+            });
+
         [HttpGet("settings")]
         [Authorize]
         public Task<IActionResult> GetMyProfileSettings() =>
             WithUser(user =>
                 user?.Profile is null
                     ? Unauthorized("User profile not found.")
-                    : Ok(user.ToUserProfileSettingsDto())
+                    : Ok(user.ToUserProfileSettingsDto(user.GetProfilePictureUrl(_pathService)))
             );
+
         [HttpPut("settings")]
         [Authorize]
         public Task<IActionResult> UpdateMyProfileSettingsAsync([FromBody] UpdateUserProfileSettingsRequestDto requestDto) =>
@@ -46,18 +82,11 @@ namespace Calibr8Fit.Api.Controllers
             {
                 if (user?.Profile is null) return Unauthorized("User profile not found.");
 
-                if (requestDto.ProfilePictureFileName is not null)
-                {
-                    var result = await _userProfileService.UpdateProfilePictureFileName(user, requestDto.ProfilePictureFileName);
-                    if (!result.Succeeded)
-                        return BadRequest(result.Errors);
-                }
-
                 // Update user profile settings
                 await _userProfileRepository.UpdateAsync(requestDto.ToUserProfile(user));
 
                 // Return updated profile settings
-                return Ok(user.ToUserProfileSettingsDto());
+                return Ok(user.ToUserProfileSettingsDto(user.GetProfilePictureUrl(_pathService)));
             });
 
         // Profile Picture Management
@@ -72,7 +101,7 @@ namespace Calibr8Fit.Api.Controllers
                 if (!result.Succeeded)
                     return BadRequest(result.Errors);
 
-                return Ok(user.GetProfilePictureUrl(Request, _pathService));
+                return Ok(user.GetProfilePictureUrl(_pathService));
             });
 
         [HttpDelete("profile-picture")]
