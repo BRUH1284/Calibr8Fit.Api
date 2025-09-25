@@ -36,11 +36,11 @@ namespace Calibr8Fit.Api.Controllers
                 user?.Profile is null
                     ? Unauthorized("User profile not found.")
                     : Ok(user.ToUserProfileDto(
-                        user.GetProfilePictureUrl(_pathService),
                         _friendshipService.GetFriendsCountAsync(user.Id).Result,
                         0,
                         0,
-                        FriendshipStatus.None // Own profile, no friendship status
+                        FriendshipStatus.None, // Own profile, no friendship status
+                        _pathService
                     ))
             );
 
@@ -58,11 +58,11 @@ namespace Calibr8Fit.Api.Controllers
                 var friendshipStatus = await _friendshipService.GetFriendshipStatusAsync(u.UserName!, username);
 
                 return Ok(user.ToUserProfileDto(
-                    user.GetProfilePictureUrl(_pathService),
                     friendsCount,
                     0,
                     0,
-                    friendshipStatus
+                    friendshipStatus,
+                    _pathService
                 ));
             });
 
@@ -72,7 +72,7 @@ namespace Calibr8Fit.Api.Controllers
             WithUser(user =>
                 user?.Profile is null
                     ? Unauthorized("User profile not found.")
-                    : Ok(user.ToUserProfileSettingsDto(user.GetProfilePictureUrl(_pathService)))
+                    : Ok(user.ToUserProfileSettingsDto(_pathService))
             );
 
         [HttpPut("settings")]
@@ -86,7 +86,7 @@ namespace Calibr8Fit.Api.Controllers
                 await _userProfileRepository.UpdateAsync(requestDto.ToUserProfile(user));
 
                 // Return updated profile settings
-                return Ok(user.ToUserProfileSettingsDto(user.GetProfilePictureUrl(_pathService)));
+                return Ok(user.ToUserProfileSettingsDto(_pathService));
             });
 
         // Profile Picture Management

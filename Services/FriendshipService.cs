@@ -101,6 +101,15 @@ namespace Calibr8Fit.Api.Services
             // Remove the friend request
             await _friendRequestRepository.DeleteAsync(requesterId, addresseeId);
 
+            // Send notification to requester
+            var requester = (await _userRepository.GetByUsernameAsync(requesterUsername))!;
+            await _pushService.PushNotificationAsync(
+                requesterId,
+                "Friend Request Accepted",
+                $"Your friend request to {requester.Profile!.FirstName} {requester.Profile!.LastName} has been accepted.",
+                requester.GetProfilePictureUrl(_pathService)
+            );
+
             return Result<FriendshipDto>.Success(friendship.ToFriendshipDto(addresseeId, _pathService));
         }
 
@@ -119,6 +128,15 @@ namespace Calibr8Fit.Api.Services
 
             // Remove the friend request
             await _friendRequestRepository.DeleteAsync(requesterId, addresseeId);
+
+            // Send notification to requester
+            var requester = (await _userRepository.GetByUsernameAsync(requesterUsername))!;
+            await _pushService.PushNotificationAsync(
+                requesterId,
+                "Friend Request Rejected",
+                $"Your friend request to {requester.Profile!.FirstName} {requester.Profile!.LastName} has been rejected.",
+                requester.GetProfilePictureUrl(_pathService)
+            );
 
             return Result.Success();
         }
@@ -210,11 +228,9 @@ namespace Calibr8Fit.Api.Services
             return await _friendshipRepository.GetAllFriendsAsync(userId);
         }
 
-        public async Task<IEnumerable<FriendshipDto>> GetUserFriendshipsAsync(string userId)
-        {
-            return (await _friendshipRepository.GetUserFriendshipsAsync(userId))
+        public async Task<IEnumerable<FriendshipDto>> GetUserFriendshipsAsync(string userId) =>
+            (await _friendshipRepository.GetUserFriendshipsAsync(userId))
                 .Select(f => f.ToFriendshipDto(userId, _pathService));
-        }
 
         public async Task<int> GetFriendsCountAsync(string userId) =>
             await _friendshipRepository.GetFriendsCountAsync(userId);

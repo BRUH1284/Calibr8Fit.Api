@@ -28,6 +28,10 @@ namespace Calibr8Fit.Api.Data
         public DbSet<FriendRequest> FriendRequests { get; set; }
         public DbSet<Friendship> Friendships { get; set; }
         public DbSet<ProfilePicture> ProfilePictures { get; set; }
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<PostLike> PostLikes { get; set; }
+        public DbSet<PostImage> PostImages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -289,6 +293,61 @@ namespace Calibr8Fit.Api.Data
                         j.HasIndex(f => f.UserBId); // Index on UserBId
                         j.HasIndex(f => f.UserAId); // Index on UserAId
                     });
+
+            // Configure Post
+            builder.Entity<Post>()
+                .HasOne(p => p.User)
+                .WithMany(u => u.Posts) // User can have many Posts
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> Post
+
+            builder.Entity<Post>()
+                .HasIndex(p => p.UserId); // Index on UserId for efficient lookups
+
+            // Configure Comment
+            builder.Entity<Comment>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Comments) // User can have many Comments
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> Comment
+
+            builder.Entity<Comment>()
+                .HasOne(c => c.Post)
+                .WithMany(p => p.Comments) // Post can have many Comments
+                .HasForeignKey(c => c.PostId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for Post -> Comment
+
+            builder.Entity<Comment>()
+                .HasIndex(c => c.PostId); // Index on PostId for efficient lookups
+
+            // Configure PostLike
+            builder.Entity<PostLike>()
+                .HasKey(pl => new { pl.UserId, pl.PostId }); // Composite key
+
+            builder.Entity<PostLike>()
+                .HasOne(pl => pl.User)
+                .WithMany() // User can have many PostLikes
+                .HasForeignKey(pl => pl.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> PostLike
+
+            builder.Entity<PostLike>()
+                .HasOne(pl => pl.Post)
+                .WithMany(p => p.Likes) // Post can have many PostLikes
+                .HasForeignKey(pl => pl.PostId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for Post -> PostLike
+
+            builder.Entity<PostLike>()
+                .HasIndex(pl => pl.PostId); // Index on PostId for efficient lookups
+
+            // Configure PostImage
+            builder.Entity<PostImage>()
+                .HasKey(pi => new { pi.PostId, pi.Index }); // Composite key
+
+            builder.Entity<PostImage>()
+                .HasOne<Post>()
+                .WithMany(p => p.Images) // Post can have many PostImages
+                .HasForeignKey(pi => pi.PostId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for Post -> PostImage
         }
     }
 }

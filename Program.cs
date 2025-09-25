@@ -69,6 +69,7 @@ builder.Services.AddScoped<ITPHValidationService<Guid, Food, UserFood>, TPHValid
 builder.Services.AddScoped<IFriendshipService, FriendshipService>();
 builder.Services.AddScoped<IPathService, PathService>();
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IPostService, PostService>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -81,6 +82,10 @@ builder.Services.AddScoped<IRepositoryBase<Activity, Guid>, RepositoryBase<Activ
 builder.Services.AddScoped<IRepositoryBase<Food, Guid>, RepositoryBase<Food, Guid>>();
 builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
 builder.Services.AddScoped<IRepositoryBase<FriendRequest, string[]>, RepositoryBase<FriendRequest, string[]>>();
+builder.Services.AddScoped<IUserRepositoryBase<Post, Guid>, UserRepositoryBase<Post, Guid>>();
+builder.Services.AddScoped<IUserRepositoryBase<Comment, Guid>, UserRepositoryBase<Comment, Guid>>();
+builder.Services.AddScoped<IUserRepositoryBase<PostLike, (string, Guid)>, UserRepositoryBase<PostLike, (string, Guid)>>();
+
 
 // Data Version Repositories
 builder.Services.AddDataVersionRepo<Food, Guid>(DataResource.Foods);

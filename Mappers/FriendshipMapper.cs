@@ -1,5 +1,4 @@
 using Calibr8Fit.Api.DataTransferObjects.Friendship;
-using Calibr8Fit.Api.Extensions;
 using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Models;
 
@@ -18,7 +17,7 @@ namespace Calibr8Fit.Api.Mappers
 
             return new FriendshipDto
             {
-                Friend = friend!.ToUserSummaryDto(friend!.GetProfilePictureUrl(pathService)),
+                Friend = friend!.ToUserSummaryDto(pathService),
                 FriendsSince = friendship.FriendsSince
             };
         }
@@ -28,8 +27,8 @@ namespace Calibr8Fit.Api.Mappers
             IPathService pathService
             ) => new FriendRequestDto
             {
-                Requester = friendRequest.Requester!.ToUserSummaryDto(friendRequest.Requester!.GetProfilePictureUrl(pathService)),
-                Receiver = friendRequest.Addressee!.ToUserSummaryDto(friendRequest.Addressee!.GetProfilePictureUrl(pathService)),
+                Requester = friendRequest.Requester!.ToUserSummaryDto(pathService),
+                Receiver = friendRequest.Addressee!.ToUserSummaryDto(pathService),
                 RequestedAt = friendRequest.RequestedAt
             };
 

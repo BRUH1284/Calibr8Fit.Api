@@ -1,22 +1,24 @@
 using Calibr8Fit.Api.DataTransferObjects.User;
 using Calibr8Fit.Api.Enums;
+using Calibr8Fit.Api.Extensions;
+using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Models;
 
 namespace Calibr8Fit.Api.Mappers
 {
     public static class UserProfileMapper
     {
-        public static UserSummaryDto ToUserSummaryDto(this User user, string? profilePictureUrl)
+        public static UserSummaryDto ToUserSummaryDto(this User user, IPathService pathService)
         {
             return new UserSummaryDto
             {
                 UserName = user.UserName!,
                 FirstName = user.Profile!.FirstName,
                 LastName = user.Profile!.LastName,
-                ProfilePictureUrl = profilePictureUrl
+                ProfilePictureUrl = user.GetProfilePictureUrl(pathService)
             };
         }
-        public static UserProfileSettingsDto ToUserProfileSettingsDto(this User user, string? profilePictureUrl)
+        public static UserProfileSettingsDto ToUserProfileSettingsDto(this User user, IPathService pathService)
         {
             return new UserProfileSettingsDto
             {
@@ -30,23 +32,24 @@ namespace Calibr8Fit.Api.Mappers
                 Height = user.Profile!.Height,
                 ActivityLevel = user.Profile!.ActivityLevel,
                 Climate = user.Profile!.Climate,
-                ProfilePictureUrl = profilePictureUrl
+                ProfilePictureUrl = user.GetProfilePictureUrl(pathService)
             };
         }
         public static UserProfileDto ToUserProfileDto(
             this User user,
-            string? profilePictureUrl,
             int friendsCount,
             int followersCount,
             int followingCount,
-            FriendshipStatus friendshipStatus)
+            FriendshipStatus friendshipStatus,
+            IPathService pathService
+            )
         {
             return new UserProfileDto
             {
                 UserName = user.UserName!,
                 FirstName = user.Profile!.FirstName,
                 LastName = user.Profile!.LastName,
-                ProfilePictureUrl = profilePictureUrl,
+                ProfilePictureUrl = user.GetProfilePictureUrl(pathService),
                 Bio = "",
                 FriendsCount = friendsCount,
                 FollowersCount = followersCount,
