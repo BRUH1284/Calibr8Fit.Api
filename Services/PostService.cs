@@ -132,7 +132,7 @@ namespace Calibr8Fit.Api.Services
             if (post is null) return Result.Failure("Post not found");
 
             // Check if the user has already liked the post
-            var existingLike = await _postLikeRepository.GetByUserIdAndKeyAsync(userId, (userId, postId));
+            var existingLike = await _postLikeRepository.GetAsync(userId, postId);
             if (existingLike is not null) return Result.Failure("Post already liked");
 
             // Create new like

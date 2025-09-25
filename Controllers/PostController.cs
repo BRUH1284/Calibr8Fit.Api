@@ -60,5 +60,55 @@ namespace Calibr8Fit.Api.Controllers
                 : NotFound(new { errors = result.Errors });
         }
 
+        [HttpDelete("{postId}")]
+        public Task<IActionResult> DeletePost(Guid postId) =>
+            WithUserId(async userId =>
+            {
+                var result = await _postService.DeletePostAsync(postId, userId);
+                return result.Succeeded
+                    ? NoContent()
+                    : BadRequest(new { errors = result.Errors });
+            });
+
+        [HttpPost("{postId}/like")]
+        public Task<IActionResult> LikePost(Guid postId) =>
+            WithUserId(async userId =>
+            {
+                var result = await _postService.LikePostAsync(postId, userId);
+                return result.Succeeded
+                    ? NoContent()
+                    : BadRequest(new { errors = result.Errors });
+            });
+
+        [HttpDelete("{postId}/like")]
+        public Task<IActionResult> UnlikePost(Guid postId) =>
+            WithUserId(async userId =>
+            {
+                var result = await _postService.UnlikePostAsync(postId, userId);
+                return result.Succeeded
+                    ? NoContent()
+                    : BadRequest(new { errors = result.Errors });
+            });
+
+        [HttpPost("{postId}/comment")]
+        public Task<IActionResult> AddComment(Guid postId, [FromForm] string content) =>
+            WithUserId(async userId =>
+            {
+                var result = await _postService.AddCommentAsync(postId, content, userId);
+                return result.Succeeded
+                    ? CreatedAtAction(nameof(GetPost), new { postId }, result.Data)
+                    : BadRequest(new { errors = result.Errors });
+            });
+
+        [HttpDelete("comment/{commentId}")]
+        public Task<IActionResult> DeleteComment(Guid commentId) =>
+            WithUserId(async userId =>
+            {
+                var result = await _postService.DeleteCommentAsync(commentId, userId);
+                return result.Succeeded
+                    ? NoContent()
+                    : BadRequest(new { errors = result.Errors });
+            });
+
     }
 }
