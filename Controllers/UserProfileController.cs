@@ -19,6 +19,7 @@ namespace Calibr8Fit.Api.Controllers
         IRepositoryBase<UserProfile, string> userProfileRepository,
         IUserRepository userRepository,
         IFriendshipService friendshipService,
+        IFollowingService followingService,
         IUserProfileService userProfileService,
         IPathService pathService
         ) : UserControllerBase(currentUserService)
@@ -26,6 +27,7 @@ namespace Calibr8Fit.Api.Controllers
         private readonly IUserRepository _userRepository = userRepository;
         private readonly IRepositoryBase<UserProfile, string> _userProfileRepository = userProfileRepository;
         private readonly IFriendshipService _friendshipService = friendshipService;
+        private readonly IFollowingService _followingService = followingService;
         private readonly IUserProfileService _userProfileService = userProfileService;
         private readonly IPathService _pathService = pathService;
 
@@ -37,8 +39,8 @@ namespace Calibr8Fit.Api.Controllers
                     ? Unauthorized("User profile not found.")
                     : Ok(user.ToUserProfileDto(
                         _friendshipService.GetFriendsCountAsync(user.Id).Result,
-                        0,
-                        0,
+                        _followingService.GetFollowersCountAsync(user.Id).Result,
+                        _followingService.GetFollowingCountAsync(user.Id).Result,
                         FriendshipStatus.None, // Own profile, no friendship status
                         _pathService
                     ))
@@ -50,18 +52,15 @@ namespace Calibr8Fit.Api.Controllers
             WithUser(async u =>
             {
                 var user = await _userRepository.GetByUsernameAsync(username);
-
                 if (user?.Profile is null)
                     return NotFound($"User or user profile with {username} not found.");
 
-                var friendsCount = await _friendshipService.GetFriendsCountAsync(user.Id);
-                var friendshipStatus = await _friendshipService.GetFriendshipStatusAsync(u.UserName!, username);
-
+                // Fetch counts and friendship status
                 return Ok(user.ToUserProfileDto(
-                    friendsCount,
-                    0,
-                    0,
-                    friendshipStatus,
+                    _friendshipService.GetFriendsCountAsync(user.Id).Result,
+                    _followingService.GetFollowersCountAsync(user.Id).Result,
+                    _followingService.GetFollowingCountAsync(user.Id).Result,
+                    _friendshipService.GetFriendshipStatusAsync(u.UserName!, username).Result,
                     _pathService
                 ));
             });

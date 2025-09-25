@@ -67,6 +67,7 @@ builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<ITPHValidationService<Guid, Activity, UserActivity>, TPHValidationService<Guid, Activity, UserActivity>>();
 builder.Services.AddScoped<ITPHValidationService<Guid, Food, UserFood>, TPHValidationService<Guid, Food, UserFood>>();
 builder.Services.AddScoped<IFriendshipService, FriendshipService>();
+builder.Services.AddScoped<IFollowingService, FollowingService>();
 builder.Services.AddScoped<IPathService, PathService>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IPostService, PostService>();
@@ -82,6 +83,7 @@ builder.Services.AddScoped<IRepositoryBase<Activity, Guid>, RepositoryBase<Activ
 builder.Services.AddScoped<IRepositoryBase<Food, Guid>, RepositoryBase<Food, Guid>>();
 builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
 builder.Services.AddScoped<IRepositoryBase<FriendRequest, string[]>, RepositoryBase<FriendRequest, string[]>>();
+builder.Services.AddScoped<IUserRepositoryBase<UserFollower, (string, string)>, UserRepositoryBase<UserFollower, (string, string)>>();
 builder.Services.AddScoped<IUserRepositoryBase<Post, Guid>, UserRepositoryBase<Post, Guid>>();
 builder.Services.AddScoped<IUserRepositoryBase<Comment, Guid>, UserRepositoryBase<Comment, Guid>>();
 builder.Services.AddScoped<IUserRepositoryBase<PostLike, (string, Guid)>, UserRepositoryBase<PostLike, (string, Guid)>>();

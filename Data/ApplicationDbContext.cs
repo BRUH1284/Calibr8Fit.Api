@@ -27,6 +27,7 @@ namespace Calibr8Fit.Api.Data
         public DbSet<DailyBurnTarget> DailyBurnTargets { get; set; }
         public DbSet<FriendRequest> FriendRequests { get; set; }
         public DbSet<Friendship> Friendships { get; set; }
+        public DbSet<UserFollower> UserFollowers { get; set; }
         public DbSet<ProfilePicture> ProfilePictures { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Comment> Comments { get; set; }
@@ -293,6 +294,28 @@ namespace Calibr8Fit.Api.Data
                         j.HasIndex(f => f.UserBId); // Index on UserBId
                         j.HasIndex(f => f.UserAId); // Index on UserAId
                     });
+
+            // Configure UserFollower
+            builder.Entity<UserFollower>()
+                .HasKey(uf => new { uf.FollowerId, uf.FolloweeId }); // Composite key
+
+            builder.Entity<UserFollower>()
+                .HasOne(uf => uf.Follower)
+                .WithMany(u => u.Following) // User can follow many Users
+                .HasForeignKey(uf => uf.FollowerId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> UserFollower
+
+            builder.Entity<UserFollower>()
+                .HasOne(uf => uf.Followee)
+                .WithMany(u => u.Followers) // User can have many followers
+                .HasForeignKey(uf => uf.FolloweeId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for User -> UserFollower
+
+            builder.Entity<UserFollower>()
+                .HasIndex(uf => uf.FollowerId); // Index on FollowerId for efficient lookups
+
+            builder.Entity<UserFollower>()
+                .HasIndex(uf => uf.FolloweeId); // Index on FolloweeId for efficient lookups
 
             // Configure Post
             builder.Entity<Post>()

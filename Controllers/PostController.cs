@@ -86,7 +86,7 @@ namespace Calibr8Fit.Api.Controllers
             {
                 var result = await _postService.UnlikePostAsync(postId, userId);
                 return result.Succeeded
-                    ? NoContent()
+                    ? Ok()
                     : BadRequest(new { errors = result.Errors });
             });
 

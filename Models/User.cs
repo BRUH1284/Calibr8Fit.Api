@@ -17,8 +17,8 @@ namespace Calibr8Fit.Api.Models
         public virtual ICollection<FriendRequest>? SentFriendRequests { get; set; } = [];
         public virtual ICollection<FriendRequest>? ReceivedFriendRequests { get; set; } = [];
         public virtual ICollection<User>? Friends { get; set; } = [];
-        public virtual ICollection<User>? Followers { get; set; } = [];
-        public virtual ICollection<User>? Following { get; set; } = [];
+        public virtual ICollection<UserFollower>? Followers { get; set; } = [];
+        public virtual ICollection<UserFollower>? Following { get; set; } = [];
         public virtual ICollection<Post>? Posts { get; set; } = [];
         public virtual ICollection<Comment>? Comments { get; set; } = [];
     }
