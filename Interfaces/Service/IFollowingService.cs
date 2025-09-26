@@ -11,5 +11,6 @@ namespace Calibr8Fit.Api.Interfaces.Service
         Task<int> GetFollowersCountAsync(string userId);
         Task<Result<List<UserSummaryDto>>> GetFollowingAsync(string userId);
         Task<int> GetFollowingCountAsync(string userId);
+        Task<bool> IsFollowingAsync(string userId, string followeeUsername);
     }
 }

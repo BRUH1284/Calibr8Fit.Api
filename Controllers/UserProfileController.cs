@@ -42,6 +42,7 @@ namespace Calibr8Fit.Api.Controllers
                         _followingService.GetFollowersCountAsync(user.Id).Result,
                         _followingService.GetFollowingCountAsync(user.Id).Result,
                         FriendshipStatus.None, // Own profile, no friendship status
+                        false, // Own profile, cannot be followed by self
                         _pathService
                     ))
             );
@@ -49,7 +50,7 @@ namespace Calibr8Fit.Api.Controllers
         [HttpGet("{username}")]
         [Authorize]
         public Task<IActionResult> GetUserProfileByUsername(string username) =>
-            WithUser(async u =>
+            WithUserId(async thisUserId =>
             {
                 var user = await _userRepository.GetByUsernameAsync(username);
                 if (user?.Profile is null)
@@ -60,7 +61,8 @@ namespace Calibr8Fit.Api.Controllers
                     _friendshipService.GetFriendsCountAsync(user.Id).Result,
                     _followingService.GetFollowersCountAsync(user.Id).Result,
                     _followingService.GetFollowingCountAsync(user.Id).Result,
-                    _friendshipService.GetFriendshipStatusAsync(u.UserName!, username).Result,
+                    _friendshipService.GetFriendshipStatusAsync(thisUserId, username).Result,
+                    _followingService.IsFollowingAsync(thisUserId, username).Result,
                     _pathService
                 ));
             });

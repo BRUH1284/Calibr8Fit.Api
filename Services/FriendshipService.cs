@@ -7,6 +7,7 @@ using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Mappers;
 using Calibr8Fit.Api.Models;
 using Calibr8Fit.Api.Services.Results;
+using Microsoft.EntityFrameworkCore;
 
 namespace Calibr8Fit.Api.Services
 {
@@ -23,24 +24,12 @@ namespace Calibr8Fit.Api.Services
         private readonly IPathService _pathService = pathService;
         private readonly IPushService _pushService = pushService;
 
-        // Helper method to get user ID from username
-        private async Task<Result<string>> GetUserIdFromUsernameAsync(string username)
-        {
-            var user = await _userRepository.GetByUsernameAsync(username);
-            if (user == null)
-                return Result<string>.Failure($"User with username '{username}' not found");
-
-            return Result<string>.Success(user.Id);
-        }
-
         public async Task<Result<FriendRequestDto>> SendFriendRequestAsync(string requesterId, string addresseeUsername)
         {
             // Get addressee ID from username
-            var addresseeIdResult = await GetUserIdFromUsernameAsync(addresseeUsername);
-            if (!addresseeIdResult.Succeeded)
-                return Result<FriendRequestDto>.Failure(addresseeIdResult.Errors!.First());
-
-            var addresseeId = addresseeIdResult.Data!;
+            var addresseeId = await _userRepository.GetIdByUsernameAsync(addresseeUsername);
+            if (addresseeId is null)
+                return Result<FriendRequestDto>.Failure($"User with username '{addresseeUsername}' not found");
 
             // Validate users are different
             if (requesterId == addresseeId)
@@ -66,9 +55,16 @@ namespace Calibr8Fit.Api.Services
                 RequestedAt = DateTime.UtcNow
             };
 
-            var createdRequest = await _friendRequestRepository.AddAsync(friendRequest);
-            if (createdRequest is null)
-                return Result<FriendRequestDto>.Failure("Failed to create friend request");
+            await _friendRequestRepository.AddAsync(friendRequest);
+
+            // Reload the created request with navigation properties
+            var requestWithNavigationProps = await _friendRequestRepository.QuerySingleAsync(q =>
+                q.Include(fr => fr.Requester)
+                 .Include(fr => fr.Addressee)
+                 .Where(fr => fr.RequesterId == requesterId && fr.AddresseeId == addresseeId));
+
+            if (requestWithNavigationProps is null)
+                return Result<FriendRequestDto>.Failure("Failed to retrieve created friend request");
 
             // Send notification to addressee
             var requester = (await _userRepository.GetAsync(requesterId))!;
@@ -79,17 +75,15 @@ namespace Calibr8Fit.Api.Services
                 requester.GetProfilePictureUrl(_pathService)
                 );
 
-            return Result<FriendRequestDto>.Success(createdRequest.ToFriendRequestDto(_pathService));
+            return Result<FriendRequestDto>.Success(requestWithNavigationProps.ToFriendRequestDto(_pathService));
         }
 
         public async Task<Result<FriendshipDto>> AcceptFriendRequestAsync(string addresseeId, string requesterUsername)
         {
             // Get requester ID from username
-            var requesterIdResult = await GetUserIdFromUsernameAsync(requesterUsername);
-            if (!requesterIdResult.Succeeded)
-                return Result<FriendshipDto>.Failure(requesterIdResult.Errors!.First());
-
-            var requesterId = requesterIdResult.Data!;
+            var requesterId = await _userRepository.GetIdByUsernameAsync(requesterUsername);
+            if (requesterId is null)
+                return Result<FriendshipDto>.Failure($"User with username '{requesterUsername}' not found");
 
             // Get the friend request
             if (!await _friendRequestRepository.KeyExistsAsync(requesterId, addresseeId))
@@ -116,11 +110,9 @@ namespace Calibr8Fit.Api.Services
         public async Task<Result> RejectFriendRequestAsync(string addresseeId, string requesterUsername)
         {
             // Get requester ID from username
-            var requesterIdResult = await GetUserIdFromUsernameAsync(requesterUsername);
-            if (!requesterIdResult.Succeeded)
-                return Result.Failure(requesterIdResult.Errors!.First());
-
-            var requesterId = requesterIdResult.Data!;
+            var requesterId = await _userRepository.GetIdByUsernameAsync(requesterUsername);
+            if (requesterId is null)
+                return Result.Failure($"User with username '{requesterUsername}' not found");
 
             // Get the friend request
             if (!await _friendRequestRepository.KeyExistsAsync(requesterId, addresseeId))
@@ -144,11 +136,9 @@ namespace Calibr8Fit.Api.Services
         public async Task<Result> CancelFriendRequestAsync(string requesterId, string addresseeUsername)
         {
             // Get addressee ID from username
-            var addresseeIdResult = await GetUserIdFromUsernameAsync(addresseeUsername);
-            if (!addresseeIdResult.Succeeded)
-                return Result.Failure(addresseeIdResult.Errors!.First());
-
-            var addresseeId = addresseeIdResult.Data!;
+            var addresseeId = await _userRepository.GetIdByUsernameAsync(addresseeUsername);
+            if (addresseeId is null)
+                return Result.Failure($"User with username '{addresseeUsername}' not found");
 
             // Get the friend request
             if (!await _friendRequestRepository.KeyExistsAsync(requesterId, addresseeId))
@@ -178,16 +168,13 @@ namespace Calibr8Fit.Api.Services
         public async Task<Result> RemoveFriendshipAsync(string userAUsername, string userBUsername)
         {
             // Get user IDs from usernames
-            var userAIdResult = await GetUserIdFromUsernameAsync(userAUsername);
-            if (!userAIdResult.Succeeded)
-                return Result.Failure(userAIdResult.Errors!.First());
+            var userAId = await _userRepository.GetIdByUsernameAsync(userAUsername);
+            if (userAId is null)
+                return Result.Failure($"User with username '{userAUsername}' not found");
 
-            var userBIdResult = await GetUserIdFromUsernameAsync(userBUsername);
-            if (!userBIdResult.Succeeded)
-                return Result.Failure(userBIdResult.Errors!.First());
-
-            var userAId = userAIdResult.Data!;
-            var userBId = userBIdResult.Data!;
+            var userBId = await _userRepository.GetIdByUsernameAsync(userBUsername);
+            if (userBId is null)
+                return Result.Failure($"User with username '{userBUsername}' not found");
 
             if (!await _friendshipRepository.RemoveFriendshipAsync(userAId, userBId))
                 return Result.Failure("Friendship not found or already removed");
@@ -198,29 +185,29 @@ namespace Calibr8Fit.Api.Services
         public async Task<bool> AreFriendsAsync(string userAUsername, string userBUsername)
         {
             // Get user IDs from usernames
-            var userAIdResult = await GetUserIdFromUsernameAsync(userAUsername);
-            if (!userAIdResult.Succeeded)
+            var userAId = await _userRepository.GetIdByUsernameAsync(userAUsername);
+            if (userAId is null)
                 return false;
 
-            var userBIdResult = await GetUserIdFromUsernameAsync(userBUsername);
-            if (!userBIdResult.Succeeded)
+            var userBId = await _userRepository.GetIdByUsernameAsync(userBUsername);
+            if (userBId is null)
                 return false;
 
-            return await _friendshipRepository.AreFriendsAsync(userAIdResult.Data!, userBIdResult.Data!);
+            return await _friendshipRepository.AreFriendsAsync(userAId, userBId);
         }
 
         public async Task<Friendship?> GetFriendshipAsync(string userAUsername, string userBUsername)
         {
             // Get user IDs from usernames
-            var userAIdResult = await GetUserIdFromUsernameAsync(userAUsername);
-            if (!userAIdResult.Succeeded)
+            var userAId = await _userRepository.GetIdByUsernameAsync(userAUsername);
+            if (userAId is null)
                 return null;
 
-            var userBIdResult = await GetUserIdFromUsernameAsync(userBUsername);
-            if (!userBIdResult.Succeeded)
+            var userBId = await _userRepository.GetIdByUsernameAsync(userBUsername);
+            if (userBId is null)
                 return null;
 
-            return await _friendshipRepository.GetFriendshipAsync(userAIdResult.Data!, userBIdResult.Data!);
+            return await _friendshipRepository.GetFriendshipAsync(userAId, userBId);
         }
 
         public async Task<IEnumerable<User>> GetAllFriendsAsync(string userId)
@@ -232,36 +219,36 @@ namespace Calibr8Fit.Api.Services
             (await _friendshipRepository.GetUserFriendshipsAsync(userId))
                 .Select(f => f.ToFriendshipDto(userId, _pathService));
 
+        public async Task<IEnumerable<FriendshipDto>> GetUserFriendshipsAsyncByUsername(string username)
+        {
+            var userId = await _userRepository.GetIdByUsernameAsync(username);
+            if (userId is null) return [];
+
+            return await GetUserFriendshipsAsync(userId);
+        }
+
         public async Task<int> GetFriendsCountAsync(string userId) =>
             await _friendshipRepository.GetFriendsCountAsync(userId);
 
-        public async Task<FriendshipStatus> GetFriendshipStatusAsync(string currentUsername, string targetUsername)
+        public async Task<FriendshipStatus> GetFriendshipStatusAsync(string userId, string targetUsername)
         {
-            // If it's the same user, return None
-            if (currentUsername == targetUsername)
+            // Get user IDs from username
+            var targetUserId = await _userRepository.GetIdByUsernameAsync(targetUsername);
+
+            if (targetUserId is null || userId == targetUserId)
                 return FriendshipStatus.None;
-
-            // Get user IDs from usernames
-            var currentUserIdResult = await GetUserIdFromUsernameAsync(currentUsername);
-            var targetUserIdResult = await GetUserIdFromUsernameAsync(targetUsername);
-
-            if (!currentUserIdResult.Succeeded || !targetUserIdResult.Succeeded)
-                return FriendshipStatus.None;
-
-            var currentUserId = currentUserIdResult.Data!;
-            var targetUserId = targetUserIdResult.Data!;
 
             // Check if they are already friends
-            if (await _friendshipRepository.AreFriendsAsync(currentUserId, targetUserId))
+            if (await _friendshipRepository.AreFriendsAsync(userId, targetUserId))
                 return FriendshipStatus.Friends;
 
             // Check for pending friend requests
             // Check if current user sent request to target user
-            if (await _friendRequestRepository.KeyExistsAsync(currentUserId, targetUserId))
+            if (await _friendRequestRepository.KeyExistsAsync(userId, targetUserId))
                 return FriendshipStatus.PendingSent;
 
             // Check if target user sent request to current user
-            if (await _friendRequestRepository.KeyExistsAsync(targetUserId, currentUserId))
+            if (await _friendRequestRepository.KeyExistsAsync(targetUserId, userId))
                 return FriendshipStatus.PendingReceived;
 
             // No relationship

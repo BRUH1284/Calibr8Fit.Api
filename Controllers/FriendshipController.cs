@@ -103,5 +103,9 @@ namespace Calibr8Fit.Api.Controllers
                 var friendships = await _friendshipService.GetUserFriendshipsAsync(userId);
                 return Ok(friendships);
             });
+
+        [HttpGet("{username}/friends")]
+        public async Task<IActionResult> GetFriendsOfUser(string username) =>
+            Ok(await _friendshipService.GetUserFriendshipsAsyncByUsername(username));
     }
 }

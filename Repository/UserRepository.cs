@@ -15,15 +15,18 @@ namespace Calibr8Fit.Api.Repository
             query = query.Trim().ToLowerInvariant();
 
             return await _dbSet
-                .Include(u => u.Profile)
                 .Where(u => u.UserName != null && u.UserName.Contains(query))
                 .Take(10)
                 .ToListAsync();
         }
 
         public async Task<User?> GetByUsernameAsync(string username) =>
+            await _dbSet.FirstOrDefaultAsync(u => u.UserName == username);
+
+        public async Task<string?> GetIdByUsernameAsync(string username) =>
             await _dbSet
-                .Include(u => u.Profile)
-                .FirstOrDefaultAsync(u => u.UserName == username);
+                .Where(u => u.UserName == username)
+                .Select(u => u.Id)
+                .FirstOrDefaultAsync();
     }
 }

@@ -41,7 +41,7 @@ namespace Calibr8Fit.Api.Controllers
         [HttpGet("{username}/followers")]
         public async Task<IActionResult> GetFollowers(string username)
         {
-            var userId = (await _userRepository.GetByUsernameAsync(username))?.Id;
+            var userId = await _userRepository.GetIdByUsernameAsync(username);
             if (userId is null) return NotFound(new { errors = new[] { "User not found" } });
 
             var result = await _followingService.GetFollowersAsync(userId);
@@ -53,7 +53,7 @@ namespace Calibr8Fit.Api.Controllers
         [HttpGet("{username}/following")]
         public async Task<IActionResult> GetFollowing(string username)
         {
-            var userId = (await _userRepository.GetByUsernameAsync(username))?.Id;
+            var userId = await _userRepository.GetIdByUsernameAsync(username);
             if (userId is null) return NotFound(new { errors = new[] { "User not found" } });
 
             var result = await _followingService.GetFollowingAsync(userId);

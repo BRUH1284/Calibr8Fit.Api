@@ -41,6 +41,7 @@ namespace Calibr8Fit.Api.Mappers
             int followersCount,
             int followingCount,
             FriendshipStatus friendshipStatus,
+            bool followedByMe,
             IPathService pathService
             )
         {
@@ -54,7 +55,8 @@ namespace Calibr8Fit.Api.Mappers
                 FriendsCount = friendsCount,
                 FollowersCount = followersCount,
                 FollowingCount = followingCount,
-                FriendshipStatus = friendshipStatus
+                FriendshipStatus = friendshipStatus,
+                FollowedByMe = followedByMe
             };
         }
         //TODO: may break profile picture

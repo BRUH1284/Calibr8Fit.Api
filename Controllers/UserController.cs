@@ -1,5 +1,4 @@
 using Calibr8Fit.Api.Controllers.Abstract;
-using Calibr8Fit.Api.Extensions;
 using Calibr8Fit.Api.Interfaces.Repository;
 using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Mappers;

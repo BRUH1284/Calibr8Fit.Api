@@ -90,10 +90,10 @@ namespace Calibr8Fit.Api.Services
         }
         public async Task<Result<IEnumerable<PostDto>>> GetPostsByUserNameAsync(string username)
         {
-            var user = await _userRepository.GetByUsernameAsync(username);
-            if (user is null) return Result<IEnumerable<PostDto>>.Failure("User not found");
+            var userId = await _userRepository.GetIdByUsernameAsync(username);
+            if (userId is null) return Result<IEnumerable<PostDto>>.Failure("User not found");
 
-            return await GetPostsByUserIdAsync(user.Id);
+            return await GetPostsByUserIdAsync(userId);
         }
         public async Task<Result<IEnumerable<PostDto>>> GetLatestPostsByUserIdAsync(string userId, int page, int size)
         {
@@ -108,10 +108,10 @@ namespace Calibr8Fit.Api.Services
         }
         public async Task<Result<IEnumerable<PostDto>>> GetLatestPostsByUserNameAsync(string username, int page, int size)
         {
-            var user = await _userRepository.GetByUsernameAsync(username);
-            if (user is null) return Result<IEnumerable<PostDto>>.Failure("User not found");
+            var userId = await _userRepository.GetIdByUsernameAsync(username);
+            if (userId is null) return Result<IEnumerable<PostDto>>.Failure("User not found");
 
-            return await GetLatestPostsByUserIdAsync(user.Id, page, size);
+            return await GetLatestPostsByUserIdAsync(userId, page, size);
         }
         public async Task<Result<IEnumerable<PostDto>>> GetFeedPostsAsync(User user, int page, int size)
         {

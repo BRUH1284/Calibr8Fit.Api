@@ -13,6 +13,6 @@ namespace Calibr8Fit.Api.DataTransferObjects.User
         public required string? Bio { get; set; }
         public required string? ProfilePictureUrl { get; set; }
         public required FriendshipStatus FriendshipStatus { get; set; }
-
+        public required bool FollowedByMe { get; set; }
     }
 }

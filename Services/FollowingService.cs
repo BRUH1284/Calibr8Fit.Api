@@ -19,7 +19,7 @@ namespace Calibr8Fit.Api.Services
         private readonly IPathService _pathService = pathService;
         public async Task<Result> FollowUserAsync(string followerId, string followeeUsername)
         {
-            var followeeId = (await _userRepository.GetByUsernameAsync(followeeUsername))?.Id;
+            var followeeId = await _userRepository.GetIdByUsernameAsync(followeeUsername);
             if (followeeId is null) return Result.Failure("User to follow not found");
             if (followerId == followeeId) return Result.Failure("Cannot follow yourself");
 
@@ -38,14 +38,13 @@ namespace Calibr8Fit.Api.Services
 
         public async Task<Result> UnfollowUserAsync(string followerId, string followeeUsername)
         {
-            var followeeId = (await _userRepository.GetByUsernameAsync(followeeUsername))?.Id;
+            var followeeId = await _userRepository.GetIdByUsernameAsync(followeeUsername);
             if (followeeId is null) return Result.Failure("User to unfollow not found");
             if (followerId == followeeId) return Result.Failure("Cannot unfollow yourself");
 
-            var existingFollow = await _userFollowerRepository.GetAsync(followerId, followeeId);
-            if (existingFollow is null) return Result.Failure("Not following this user");
+            var userFollower = await _userFollowerRepository.DeleteAsync(followerId, followeeId);
+            if (userFollower is null) return Result.Failure("Not following this user");
 
-            await _userFollowerRepository.DeleteAsync(existingFollow);
             return Result.Success();
         }
 
@@ -71,5 +70,12 @@ namespace Calibr8Fit.Api.Services
         }
         public async Task<int> GetFollowingCountAsync(string userId) =>
             await _userFollowerRepository.CountAsync(f => f.FollowerId == userId);
+        public async Task<bool> IsFollowingAsync(string userId, string followeeUsername)
+        {
+            var followeeId = await _userRepository.GetIdByUsernameAsync(followeeUsername);
+            if (followeeId is null) return false;
+
+            return await _userFollowerRepository.KeyExistsAsync(userId, followeeId);
+        }
     }
 }

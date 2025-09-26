@@ -7,5 +7,6 @@ namespace Calibr8Fit.Api.Interfaces.Repository
     {
         Task<IEnumerable<User>> SearchByUsernameAsync(string query);
         Task<User?> GetByUsernameAsync(string username);
+        Task<string?> GetIdByUsernameAsync(string username);
     }
 }
