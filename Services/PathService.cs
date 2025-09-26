@@ -45,11 +45,15 @@ namespace Calibr8Fit.Api.Services
             // If path exists return public url
             return path == null ? null : BuildPublicUrl(path);
         }
-        public string GetPostImagesDirectoryPath(string username, Guid postId) =>
+        public string GetPostDirectoryPath(string username, Guid postId) =>
             EnsureDirectoryExists(Path.Combine(
                 GetUserUploadsDirectoryPath(username)!,
                 _options.PostSubfolder,
-                postId.ToString(),
+                postId.ToString()
+            ));
+        public string GetPostImagesDirectoryPath(string username, Guid postId) =>
+            EnsureDirectoryExists(Path.Combine(
+                GetPostDirectoryPath(username, postId)!,
                 _options.PostImagesSubfolder
             ));
         public string GetPostImagePath(string username, Guid postId, int index) =>

@@ -48,6 +48,18 @@ namespace Calibr8Fit.Api.Controllers
                     : NotFound(new { errors = result.Errors });
             });
 
+        [HttpGet("feed")]
+        public Task<IActionResult> GetFeedPosts(
+            [FromQuery] int page,
+            [FromQuery] int size) =>
+            WithUser(async user =>
+            {
+                var result = await _postService.GetFeedPostsAsync(user, page, size);
+                return result.Succeeded
+                    ? Ok(result.Data)
+                    : NotFound(new { errors = result.Errors });
+            });
+
         [HttpGet("user/{username}")]
         public async Task<IActionResult> GetPostsByUser(
             string username,

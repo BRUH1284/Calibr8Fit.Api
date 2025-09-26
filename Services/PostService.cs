@@ -113,15 +113,39 @@ namespace Calibr8Fit.Api.Services
 
             return await GetLatestPostsByUserIdAsync(user.Id, page, size);
         }
+        public async Task<Result<IEnumerable<PostDto>>> GetFeedPostsAsync(User user, int page, int size)
+        {
+            if (user.Following!.Count == 0) return Result<IEnumerable<PostDto>>.Success([]);
+
+            // Get IDs of followed users
+            var followedUserIdsSet = user.Following.Select(f => f.FolloweeId).ToHashSet();
+
+            // Retrieve posts from followed users with pagination
+            var posts = await _postRepository.QueryAsync(q =>
+                q.Where(p => followedUserIdsSet.Contains(p.UserId))
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip(page * size)
+                .Take(size)
+            );
+
+            // Return post dtos
+            return Result<IEnumerable<PostDto>>.Success(
+                posts.Select(async post => await GetPostDtoAsync(post)).Select(t => t.Result)
+            );
+        }
         public async Task<Result> DeletePostAsync(Guid postId, string userId)
         {
             // Retrieve the post to ensure it exists and belongs to the user
             var post = await _postRepository.GetByUserIdAndKeyAsync(userId, postId);
             if (post is null) return Result.Failure("Post not found");
 
+            // Delete associated images from disk
+            _fileService.DeleteDirectory(_pathService.GetPostDirectoryPath(post.User!.UserName!, postId));
+
             // Delete the post
-            var deleted = await _postRepository.DeleteAsync(post);
+            var deleted = await _postRepository.DeleteAsync(postId);
             if (deleted is null) return Result.Failure("Failed to delete post");
+
 
             return Result.Success();
         }
