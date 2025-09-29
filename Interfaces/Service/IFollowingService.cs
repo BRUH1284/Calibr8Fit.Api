@@ -8,8 +8,10 @@ namespace Calibr8Fit.Api.Interfaces.Service
         Task<Result> FollowUserAsync(string followerId, string followeeUsername);
         Task<Result> UnfollowUserAsync(string followerId, string followeeUsername);
         Task<Result<List<UserSummaryDto>>> GetFollowersAsync(string userId);
+        Task<Result<List<UserSummaryDto>>> SearchFollowersAsync(string userId, string query, int page, int size);
         Task<int> GetFollowersCountAsync(string userId);
         Task<Result<List<UserSummaryDto>>> GetFollowingAsync(string userId);
+        Task<Result<List<UserSummaryDto>>> SearchFollowingAsync(string userId, string query, int page, int size);
         Task<int> GetFollowingCountAsync(string userId);
         Task<bool> IsFollowingAsync(string userId, string followeeUsername);
     }

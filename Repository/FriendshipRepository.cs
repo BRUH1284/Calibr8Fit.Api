@@ -57,6 +57,21 @@ namespace Calibr8Fit.Api.Repository
                 .Where(f => f.UserAId == userId || f.UserBId == userId)
                 .ToListAsync();
 
+        public async Task<IEnumerable<Friendship>> SearchFriendshipsOfUserAsync(
+            string userId,
+            string query,
+            int page = 0,
+            int size = 10) =>
+            await _dbSet
+                .Include(f => f.UserA)
+                .Include(f => f.UserB)
+                .Where(f => (f.UserAId == userId && f.UserB!.UserName != null && f.UserB.UserName.Contains(query)) ||
+                            (f.UserBId == userId && f.UserA!.UserName != null && f.UserA.UserName.Contains(query)))
+                .OrderBy(f => f.UserAId == userId ? f.UserB!.UserName : f.UserA!.UserName)
+                .Skip(page * size)
+                .Take(size)
+                .ToListAsync();
+
         public async Task<Friendship> AddFriendshipAsync(string userAId, string userBId)
         {
             var (sortedUserAId, sortedUserBId) = SortUserIds(userAId, userBId);

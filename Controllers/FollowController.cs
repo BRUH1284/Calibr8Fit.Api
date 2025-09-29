@@ -50,6 +50,22 @@ namespace Calibr8Fit.Api.Controllers
                 : BadRequest(new { errors = result.Errors });
         }
 
+        [HttpGet("{username}/followers/search")]
+        public async Task<IActionResult> SearchFollowers(
+            [FromRoute] string username,
+            [FromQuery] string query,
+            [FromQuery] int page = 0,
+            [FromQuery] int size = 10)
+        {
+            var userId = await _userRepository.GetIdByUsernameAsync(username);
+            if (userId is null) return NotFound(new { errors = new[] { "User not found" } });
+
+            var result = await _followingService.SearchFollowersAsync(userId, query, page, size);
+            return result.Succeeded
+                ? Ok(result.Data)
+                : BadRequest(new { errors = result.Errors });
+        }
+
         [HttpGet("{username}/following")]
         public async Task<IActionResult> GetFollowing(string username)
         {
@@ -57,6 +73,22 @@ namespace Calibr8Fit.Api.Controllers
             if (userId is null) return NotFound(new { errors = new[] { "User not found" } });
 
             var result = await _followingService.GetFollowingAsync(userId);
+            return result.Succeeded
+                ? Ok(result.Data)
+                : BadRequest(new { errors = result.Errors });
+        }
+
+        [HttpGet("{username}/following/search")]
+        public async Task<IActionResult> SearchFollowing(
+            [FromRoute] string username,
+            [FromQuery] string query,
+            [FromQuery] int page = 0,
+            [FromQuery] int size = 10)
+        {
+            var userId = await _userRepository.GetIdByUsernameAsync(username);
+            if (userId is null) return NotFound(new { errors = new[] { "User not found" } });
+
+            var result = await _followingService.SearchFollowingAsync(userId, query, page, size);
             return result.Succeeded
                 ? Ok(result.Data)
                 : BadRequest(new { errors = result.Errors });

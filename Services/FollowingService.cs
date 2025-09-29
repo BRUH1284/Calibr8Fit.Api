@@ -57,12 +57,37 @@ namespace Calibr8Fit.Api.Services
             return Result<List<UserSummaryDto>>.Success(followerDtos);
         }
 
+        public async Task<Result<List<UserSummaryDto>>> SearchFollowersAsync(string userId, string query, int page, int size)
+        {
+            var followers = await _userFollowerRepository.QueryAsync(f => f
+                .Where(f => f.FolloweeId == userId && f.Follower!.UserName!.Contains(query))
+                .OrderBy(f => f.Follower!.UserName)
+                .Skip(page * size)
+                .Take(size));
+
+            var followerDtos = followers.Select(f => f.Follower!.ToUserSummaryDto(_pathService)).ToList();
+
+            return Result<List<UserSummaryDto>>.Success(followerDtos);
+        }
+
         public async Task<int> GetFollowersCountAsync(string userId) =>
             await _userFollowerRepository.CountAsync(f => f.FolloweeId == userId);
 
         public async Task<Result<List<UserSummaryDto>>> GetFollowingAsync(string userId)
         {
             var following = await _userFollowerRepository.QueryAsync(f => f.Where(f => f.FollowerId == userId));
+
+            var followingDtos = following.Select(f => f.Followee!.ToUserSummaryDto(_pathService)).ToList();
+
+            return Result<List<UserSummaryDto>>.Success(followingDtos);
+        }
+        public async Task<Result<List<UserSummaryDto>>> SearchFollowingAsync(string userId, string query, int page, int size)
+        {
+            var following = await _userFollowerRepository.QueryAsync(f => f
+                .Where(f => f.FollowerId == userId && f.Followee!.UserName!.Contains(query))
+                .OrderBy(f => f.Followee!.UserName)
+                .Skip(page * size)
+                .Take(size));
 
             var followingDtos = following.Select(f => f.Followee!.ToUserSummaryDto(_pathService)).ToList();
 

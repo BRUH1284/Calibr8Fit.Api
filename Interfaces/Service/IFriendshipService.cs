@@ -22,6 +22,7 @@ namespace Calibr8Fit.Api.Interfaces.Service
         Task<IEnumerable<User>> GetAllFriendsAsync(string userId);
         Task<IEnumerable<FriendshipDto>> GetUserFriendshipsAsync(string userId);
         Task<IEnumerable<FriendshipDto>> GetUserFriendshipsAsyncByUsername(string username);
+        Task<IEnumerable<FriendshipDto>> SearchFriendshipsOfUserAsync(string userId, string query, int page, int size);
         Task<int> GetFriendsCountAsync(string userId);
 
         // Friendship Status

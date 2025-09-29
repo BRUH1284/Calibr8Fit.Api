@@ -227,6 +227,19 @@ namespace Calibr8Fit.Api.Services
             return await GetUserFriendshipsAsync(userId);
         }
 
+        public async Task<IEnumerable<FriendshipDto>> SearchFriendshipsOfUserAsync(
+            string username,
+            string query,
+            int page = 0,
+            int size = 10)
+        {
+            var userId = await _userRepository.GetIdByUsernameAsync(username);
+            if (userId is null) return [];
+
+            var friendships = await _friendshipRepository.SearchFriendshipsOfUserAsync(userId, query, page, size);
+            return friendships.Select(f => f.ToFriendshipDto(userId, _pathService));
+        }
+
         public async Task<int> GetFriendsCountAsync(string userId) =>
             await _friendshipRepository.GetFriendsCountAsync(userId);
 
