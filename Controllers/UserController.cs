@@ -26,12 +26,15 @@ namespace Calibr8Fit.Api.Controllers
             WithUser(user => Ok(user.ToUserSummaryDto(_pathService)));
 
         [HttpGet("search")]
-        public async Task<IActionResult> SearchUsers([FromQuery] string query)
+        public async Task<IActionResult> SearchUsers(
+            [FromQuery] string query,
+            [FromQuery] int page = 0,
+            [FromQuery] int size = 10)
         {
             if (string.IsNullOrWhiteSpace(query))
                 return BadRequest("Search query cannot be empty.");
 
-            var users = await _userRepo.SearchByUsernameAsync(query);
+            var users = await _userRepo.SearchByUsernameAsync(query, page, size);
 
             var result = users.Select(u => u.ToUserSummaryDto(_pathService));
 
