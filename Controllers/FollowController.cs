@@ -53,7 +53,7 @@ namespace Calibr8Fit.Api.Controllers
         [HttpGet("{username}/followers/search")]
         public async Task<IActionResult> SearchFollowers(
             [FromRoute] string username,
-            [FromQuery] string query,
+            [FromQuery] string query = "",
             [FromQuery] int page = 0,
             [FromQuery] int size = 10)
         {
@@ -81,7 +81,7 @@ namespace Calibr8Fit.Api.Controllers
         [HttpGet("{username}/following/search")]
         public async Task<IActionResult> SearchFollowing(
             [FromRoute] string username,
-            [FromQuery] string query,
+            [FromQuery] string query = "",
             [FromQuery] int page = 0,
             [FromQuery] int size = 10)
         {
