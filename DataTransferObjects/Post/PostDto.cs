@@ -11,5 +11,6 @@ namespace Calibr8Fit.Api.DataTransferObjects.Post
         public DateTime CreatedAt { get; set; }
         public int CommentCount { get; set; }
         public int LikeCount { get; set; }
+        public bool IsLikedByCurrentUser { get; set; }
     }
 }

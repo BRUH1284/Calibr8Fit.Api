@@ -68,34 +68,34 @@ namespace Calibr8Fit.Api.Services
             var createdPost = await _postRepository.AddAsync(post);
             if (createdPost is null) return Result<PostDto>.Failure("Failed to create post");
 
-            return Result<PostDto>.Success(await GetPostDtoAsync(createdPost));
+            return Result<PostDto>.Success(await GetPostDtoAsync(createdPost, userId));
         }
-        public async Task<Result<PostDto>> GetPostAsync(Guid postId)
+        public async Task<Result<PostDto>> GetPostAsync(Guid postId, string? currentUserId = null)
         {
             // Retrieve the post
             var post = await _postRepository.GetAsync(postId);
             if (post is null) return Result<PostDto>.Failure("Post not found");
 
-            return Result<PostDto>.Success(await GetPostDtoAsync(post));
+            return Result<PostDto>.Success(await GetPostDtoAsync(post, currentUserId));
         }
-        public async Task<Result<IEnumerable<PostDto>>> GetPostsByUserIdAsync(string userId)
+        public async Task<Result<IEnumerable<PostDto>>> GetPostsByUserIdAsync(string userId, string? currentUserId = null)
         {
             // Retrieve posts by user
             var posts = await GetAllPosts(userId);
             if (!posts.Any()) return Result<IEnumerable<PostDto>>.Success([]);
 
             return Result<IEnumerable<PostDto>>.Success(
-                await Task.WhenAll(posts.Select(async post => await GetPostDtoAsync(post)))
+                await Task.WhenAll(posts.Select(async post => await GetPostDtoAsync(post, currentUserId)))
             );
         }
-        public async Task<Result<IEnumerable<PostDto>>> GetPostsByUserNameAsync(string username)
+        public async Task<Result<IEnumerable<PostDto>>> GetPostsByUserNameAsync(string username, string? currentUserId = null)
         {
             var userId = await _userRepository.GetIdByUsernameAsync(username);
             if (userId is null) return Result<IEnumerable<PostDto>>.Failure("User not found");
 
-            return await GetPostsByUserIdAsync(userId);
+            return await GetPostsByUserIdAsync(userId, currentUserId);
         }
-        public async Task<Result<IEnumerable<PostDto>>> GetLatestPostsByUserIdAsync(string userId, int page, int size)
+        public async Task<Result<IEnumerable<PostDto>>> GetLatestPostsByUserIdAsync(string userId, int page, int size, string? currentUserId = null)
         {
             // Retrieve posts by user with pagination
             var posts = await GetLatestPosts(userId, page, size);
@@ -103,15 +103,15 @@ namespace Calibr8Fit.Api.Services
 
             // TODO: improve performance
             return Result<IEnumerable<PostDto>>.Success(
-                posts.Select(async post => await GetPostDtoAsync(post)).Select(t => t.Result)
+                posts.Select(async post => await GetPostDtoAsync(post, currentUserId)).Select(t => t.Result)
             );
         }
-        public async Task<Result<IEnumerable<PostDto>>> GetLatestPostsByUserNameAsync(string username, int page, int size)
+        public async Task<Result<IEnumerable<PostDto>>> GetLatestPostsByUserNameAsync(string username, int page, int size, string? currentUserId = null)
         {
             var userId = await _userRepository.GetIdByUsernameAsync(username);
             if (userId is null) return Result<IEnumerable<PostDto>>.Failure("User not found");
 
-            return await GetLatestPostsByUserIdAsync(userId, page, size);
+            return await GetLatestPostsByUserIdAsync(userId, page, size, currentUserId);
         }
         public async Task<Result<IEnumerable<PostDto>>> GetFeedPostsAsync(User user, int page, int size)
         {
@@ -130,7 +130,7 @@ namespace Calibr8Fit.Api.Services
 
             // Return post dtos
             return Result<IEnumerable<PostDto>>.Success(
-                posts.Select(async post => await GetPostDtoAsync(post)).Select(t => t.Result)
+                posts.Select(async post => await GetPostDtoAsync(post, user.Id)).Select(t => t.Result)
             );
         }
         public async Task<Result> DeletePostAsync(Guid postId, string userId)
@@ -228,14 +228,17 @@ namespace Calibr8Fit.Api.Services
         private async Task<IEnumerable<Post>> GetAllPosts(string userId) =>
             await _postRepository.GetAllByUserIdAsync(userId);
         // TODO: improve performance
-        private async Task<PostDto> GetPostDtoAsync(Post post)
+        private async Task<PostDto> GetPostDtoAsync(Post post, string? currentUserId = null)
         {
             var likeCount = await _postLikeRepository.CountAsync(pl => pl.PostId == post.Id);
             var commentCount = await _commentRepository.CountAsync(c => c.PostId == post.Id);
+            var isLikedByCurrentUser = currentUserId is not null &&
+                await _postLikeRepository.KeyExistsAsync(currentUserId, post.Id);
 
             return post.ToPostDto(
                 likeCount,
                 commentCount,
+                isLikedByCurrentUser,
                 _pathService
             );
         }

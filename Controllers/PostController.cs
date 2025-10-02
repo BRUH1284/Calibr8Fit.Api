@@ -28,21 +28,22 @@ namespace Calibr8Fit.Api.Controllers
             });
 
         [HttpGet("{postId}")]
-        public async Task<IActionResult> GetPost(Guid postId)
-        {
-            var result = await _postService.GetPostAsync(postId);
-            return result.Succeeded
-                ? Ok(result.Data)
-                : NotFound(new { errors = result.Errors });
-        }
+        public Task<IActionResult> GetPost(Guid postId) =>
+            WithUserId(async userId =>
+            {
+                var result = await _postService.GetPostAsync(postId, userId);
+                return result.Succeeded
+                    ? Ok(result.Data)
+                    : NotFound(new { errors = result.Errors });
+            });
 
         [HttpGet("my")]
         public Task<IActionResult> GetMyPosts(
-            [FromQuery] int page,
-            [FromQuery] int size) =>
+            [FromQuery] int page = 0,
+            [FromQuery] int size = 10) =>
             WithUserId(async userId =>
             {
-                var result = await _postService.GetLatestPostsByUserIdAsync(userId, page, size);
+                var result = await _postService.GetLatestPostsByUserIdAsync(userId, page, size, userId);
                 return result.Succeeded
                     ? Ok(result.Data)
                     : NotFound(new { errors = result.Errors });
@@ -50,8 +51,8 @@ namespace Calibr8Fit.Api.Controllers
 
         [HttpGet("feed")]
         public Task<IActionResult> GetFeedPosts(
-            [FromQuery] int page,
-            [FromQuery] int size) =>
+            [FromQuery] int page = 0,
+            [FromQuery] int size = 10) =>
             WithUser(async user =>
             {
                 var result = await _postService.GetFeedPostsAsync(user, page, size);
@@ -61,16 +62,17 @@ namespace Calibr8Fit.Api.Controllers
             });
 
         [HttpGet("user/{username}")]
-        public async Task<IActionResult> GetPostsByUser(
+        public Task<IActionResult> GetPostsByUser(
             string username,
-            [FromQuery] int page,
-            [FromQuery] int size)
-        {
-            var result = await _postService.GetLatestPostsByUserNameAsync(username, page, size);
-            return result.Succeeded
-                ? Ok(result.Data)
-                : NotFound(new { errors = result.Errors });
-        }
+            [FromQuery] int page = 0,
+            [FromQuery] int size = 10) =>
+            WithUserId(async userId =>
+            {
+                var result = await _postService.GetLatestPostsByUserNameAsync(username, page, size, userId);
+                return result.Succeeded
+                    ? Ok(result.Data)
+                    : NotFound(new { errors = result.Errors });
+            });
 
         [HttpDelete("{postId}")]
         public Task<IActionResult> DeletePost(Guid postId) =>
@@ -88,7 +90,7 @@ namespace Calibr8Fit.Api.Controllers
             {
                 var result = await _postService.LikePostAsync(postId, userId);
                 return result.Succeeded
-                    ? NoContent()
+                    ? Ok()
                     : BadRequest(new { errors = result.Errors });
             });
 
@@ -98,7 +100,7 @@ namespace Calibr8Fit.Api.Controllers
             {
                 var result = await _postService.UnlikePostAsync(postId, userId);
                 return result.Succeeded
-                    ? Ok()
+                    ? NoContent()
                     : BadRequest(new { errors = result.Errors });
             });
 
@@ -121,6 +123,5 @@ namespace Calibr8Fit.Api.Controllers
                     ? NoContent()
                     : BadRequest(new { errors = result.Errors });
             });
-
     }
 }

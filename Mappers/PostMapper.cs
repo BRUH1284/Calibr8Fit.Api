@@ -10,6 +10,7 @@ namespace Calibr8Fit.Api.Mappers
             this Post post,
             int likeCount,
             int commentCount,
+            bool isLikedByCurrentUser,
             IPathService pathService
         ) => new PostDto
         {
@@ -19,6 +20,7 @@ namespace Calibr8Fit.Api.Mappers
             CreatedAt = post.CreatedAt,
             CommentCount = commentCount,
             LikeCount = likeCount,
+            IsLikedByCurrentUser = isLikedByCurrentUser,
             ImageUrls = post.Images!.Select(img =>
                 pathService.GetPostImageUrl(
                     post.User!.UserName!,
@@ -38,13 +40,6 @@ namespace Calibr8Fit.Api.Mappers
             Content = comment.Content,
             CreatedAt = comment.CreatedAt
         };
-
-        public static IEnumerable<PostDto> ToPostDtos(
-            this IEnumerable<Post> posts,
-            int likeCount,
-            int commentCount,
-            IPathService pathService
-        ) => posts.Select(p => p.ToPostDto(likeCount, commentCount, pathService));
 
         public static IEnumerable<CommentDto> ToCommentDtos(
             this IEnumerable<Comment> comments,
