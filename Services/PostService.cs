@@ -70,6 +70,7 @@ namespace Calibr8Fit.Api.Services
 
             return Result<PostDto>.Success(await GetPostDtoAsync(createdPost, userId));
         }
+
         public async Task<Result<PostDto>> GetPostAsync(Guid postId, string? currentUserId = null)
         {
             // Retrieve the post
@@ -78,6 +79,7 @@ namespace Calibr8Fit.Api.Services
 
             return Result<PostDto>.Success(await GetPostDtoAsync(post, currentUserId));
         }
+
         public async Task<Result<IEnumerable<PostDto>>> GetPostsByUserIdAsync(string userId, string? currentUserId = null)
         {
             // Retrieve posts by user
@@ -88,6 +90,7 @@ namespace Calibr8Fit.Api.Services
                 await Task.WhenAll(posts.Select(async post => await GetPostDtoAsync(post, currentUserId)))
             );
         }
+
         public async Task<Result<IEnumerable<PostDto>>> GetPostsByUserNameAsync(string username, string? currentUserId = null)
         {
             var userId = await _userRepository.GetIdByUsernameAsync(username);
@@ -95,6 +98,7 @@ namespace Calibr8Fit.Api.Services
 
             return await GetPostsByUserIdAsync(userId, currentUserId);
         }
+
         public async Task<Result<IEnumerable<PostDto>>> GetLatestPostsByUserIdAsync(string userId, int page, int size, string? currentUserId = null)
         {
             // Retrieve posts by user with pagination
@@ -106,6 +110,7 @@ namespace Calibr8Fit.Api.Services
                 posts.Select(async post => await GetPostDtoAsync(post, currentUserId)).Select(t => t.Result)
             );
         }
+
         public async Task<Result<IEnumerable<PostDto>>> GetLatestPostsByUserNameAsync(string username, int page, int size, string? currentUserId = null)
         {
             var userId = await _userRepository.GetIdByUsernameAsync(username);
@@ -113,6 +118,7 @@ namespace Calibr8Fit.Api.Services
 
             return await GetLatestPostsByUserIdAsync(userId, page, size, currentUserId);
         }
+
         public async Task<Result<IEnumerable<PostDto>>> GetFeedPostsAsync(User user, int page, int size)
         {
             if (user.Following!.Count == 0) return Result<IEnumerable<PostDto>>.Success([]);
@@ -171,6 +177,7 @@ namespace Calibr8Fit.Api.Services
 
             return Result.Success();
         }
+
         public async Task<Result> UnlikePostAsync(Guid postId, string userId)
         {
             // Check if the post exists
@@ -186,6 +193,26 @@ namespace Calibr8Fit.Api.Services
 
             return Result.Success();
         }
+
+        public async Task<Result<IEnumerable<CommentDto>>> GetCommentsAsync(Guid postId, int page, int size)
+        {
+            // Check if the post exists
+            var post = await _postRepository.GetAsync(postId);
+            if (post is null) return Result<IEnumerable<CommentDto>>.Failure("Post not found");
+
+            // Retrieve comments with pagination
+            var comments = await _commentRepository.QueryAsync(q =>
+                q.Where(c => c.PostId == postId)
+                .OrderByDescending(c => c.CreatedAt)
+                .Skip(page * size)
+                .Take(size)
+            );
+
+            return Result<IEnumerable<CommentDto>>.Success(
+                comments.Select(c => c.ToCommentDto(_pathService))
+            );
+        }
+
         public async Task<Result<CommentDto>> AddCommentAsync(Guid postId, string content, string userId)
         {
             // Check if the post exists
@@ -205,6 +232,7 @@ namespace Calibr8Fit.Api.Services
 
             return Result<CommentDto>.Success(createdComment.ToCommentDto(_pathService));
         }
+
         public async Task<Result> DeleteCommentAsync(Guid commentId, string userId)
         {
             // Retrieve the comment to ensure it exists and belongs to the user

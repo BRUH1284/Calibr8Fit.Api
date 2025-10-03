@@ -104,8 +104,20 @@ namespace Calibr8Fit.Api.Controllers
                     : BadRequest(new { errors = result.Errors });
             });
 
+        [HttpGet("{postId}/comments")]
+        public async Task<IActionResult> GetComments(
+            Guid postId,
+            [FromQuery] int page = 0,
+            [FromQuery] int size = 10)
+        {
+            var result = await _postService.GetCommentsAsync(postId, page, size);
+            return result.Succeeded
+                ? Ok(result.Data)
+                : NotFound(new { errors = result.Errors });
+        }
+
         [HttpPost("{postId}/comment")]
-        public Task<IActionResult> AddComment(Guid postId, [FromForm] string content) =>
+        public Task<IActionResult> AddComment(Guid postId, [FromBody] string content) =>
             WithUserId(async userId =>
             {
                 var result = await _postService.AddCommentAsync(postId, content, userId);

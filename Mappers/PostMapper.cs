@@ -36,6 +36,7 @@ namespace Calibr8Fit.Api.Mappers
         ) => new CommentDto
         {
             Id = comment.Id,
+            PostId = comment.PostId,
             Author = comment.User!.ToUserSummaryDto(pathService),
             Content = comment.Content,
             CreatedAt = comment.CreatedAt
