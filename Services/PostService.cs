@@ -185,12 +185,8 @@ namespace Calibr8Fit.Api.Services
             var post = await _postRepository.GetAsync(postId);
             if (post is null) return Result.Failure("Post not found");
 
-            // Check if the user has liked the post
-            var existingLike = await _postLikeRepository.GetByUserIdAndKeyAsync(userId, (userId, postId));
-            if (existingLike is null) return Result.Failure("Post not liked");
-
-            var deletedLike = await _postLikeRepository.DeleteAsync(existingLike);
-            if (deletedLike is null) return Result.Failure("Failed to unlike post");
+            var deletedLike = await _postLikeRepository.DeleteAsync(userId, postId);
+            if (deletedLike is null) return Result.Failure("Post not liked");
 
             return Result.Success();
         }
