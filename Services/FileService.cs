@@ -7,7 +7,7 @@ namespace Calibr8Fit.Api.Services
     {
         public bool IsImage(IFormFile file) => file.ContentType.StartsWith("image/");
         public bool IsExist(string path) => !string.IsNullOrEmpty(path) && File.Exists(path);
-        public async Task<string> SaveImageAsync(IFormFile file, string savePath)
+        public async Task<string> SaveImageAsync(IFormFile file, string savePath, string? fileName = null)
         {
             // Check if file is an image
             if (!IsImage(file))
@@ -17,7 +17,7 @@ namespace Calibr8Fit.Api.Services
 
             // Construct full path
             var fileExt = Path.GetExtension(file.FileName);
-            var fileName = $"{Guid.NewGuid()}{fileExt}";
+            fileName = fileName is null ? $"{Guid.NewGuid()}{fileExt}" : $"{fileName}{fileExt}";
             var fullPath = Path.Combine(savePath, fileName);
 
             // Save images

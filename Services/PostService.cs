@@ -43,7 +43,8 @@ namespace Calibr8Fit.Api.Services
                         // Save image to disk
                         await _fileService.SaveImageAsync(
                             img,
-                            _pathService.GetPostImagePath(username, postId, index)
+                            _pathService.GetPostImagesDirectoryPath(username, postId),
+                            index.ToString()
                         );
 
                         // Return PostImage entity

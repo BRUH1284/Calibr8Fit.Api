@@ -56,13 +56,15 @@ namespace Calibr8Fit.Api.Services
                 GetPostDirectoryPath(username, postId)!,
                 _options.PostImagesSubfolder
             ));
-        public string GetPostImagePath(string username, Guid postId, int index) =>
-            Path.Combine(
-                GetPostImagesDirectoryPath(username, postId),
-                index.ToString()
-            );
-        public string? GetPostImageUrl(string username, Guid postId, int index) =>
-            BuildPublicUrl(GetPostImagePath(username, postId, index));
+        public string? GetPostImageUrl(string username, Guid postId, int index)
+        {
+            var directoryPath = GetPostImagesDirectoryPath(username, postId);
+            var imagePath = Directory.GetFiles(directoryPath, $"{index}.*");
+
+            if (imagePath.Length == 0 || !File.Exists(imagePath[0])) return null;
+
+            return BuildPublicUrl(imagePath[0]);
+        }
         public string RemoveRoot(string path) =>
             path.StartsWith(_options.RootPath) ?
                 path.Substring(_options.RootPath.Length + 1) :
