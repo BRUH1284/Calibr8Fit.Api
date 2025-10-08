@@ -237,7 +237,7 @@ namespace Calibr8Fit.Api.Services
             if (comment is null) return Result.Failure("Comment not found");
 
             // Delete the comment
-            var deleted = await _commentRepository.DeleteAsync(comment);
+            var deleted = await _commentRepository.DeleteAsync(commentId);
             if (deleted is null) return Result.Failure("Failed to delete comment");
 
             return Result.Success();
