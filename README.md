@@ -51,6 +51,17 @@ This service provides RESTful endpoints for nutrition tracking, water intake, we
 ├── Validators/              # Input validators
 ├── Program.cs               # Application entry point
 └── README.md
+└── .env
+```
+
+Example .env
+```
+DefaultConnection="Host=localhost;Port=5432;Database=calibr8fitdb;Username=calibr8fit;Password=***"
+JWT_ISSUER=http://localhost:5246
+JWT_AUDIENCE=http://localhost:5246
+JWT_SIGNING_KEY=LONGRANDOMSIGNINGKEY
+
+FirebaseCredentialPath=credentials/***.json
 ```
 
 ## Database Schema
