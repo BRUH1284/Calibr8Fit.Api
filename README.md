@@ -63,6 +63,10 @@ JWT_SIGNING_KEY=LONGRANDOMSIGNINGKEY
 
 FirebaseCredentialPath=credentials/***.json
 ```
+Example run command:
+```
+dotnet run --urls "http://127.0.0.1:5054"
+```
 
 ## Database Schema
 <img width="1921" height="2368" alt="Untitled" src="https://github.com/user-attachments/assets/ad449d51-298b-49cb-8403-075ba39fa7d0" />
