@@ -66,7 +66,6 @@ namespace Calibr8Fit.Api.Controllers.Abstract
             });
 
         [HttpPost]
-
         public virtual Task<IActionResult> Add([FromBody] TAddDto requestDto) =>
         WithUserId(async userId =>
         {

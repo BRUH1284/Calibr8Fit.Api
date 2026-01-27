@@ -9,7 +9,6 @@ namespace Calibr8Fit.Api.DataTransferObjects.User
         public required string LastName { get; set; }
         public required DateTime DateOfBirth { get; set; }
         public required Gender Gender { get; set; }
-        public required float Weight { get; set; }
         public required float TargetWeight { get; set; }
         public required float Height { get; set; }
         public required UserActivityLevel ActivityLevel { get; set; }

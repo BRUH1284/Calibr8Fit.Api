@@ -10,7 +10,6 @@ namespace Calibr8Fit.Api.Models
         public string LastName { get; set; } = "";
         public DateTime DateOfBirth { get; set; } = DateTime.MinValue;
         public Gender Gender { get; set; } = Gender.Male;
-        public float Weight { get; set; } = 0.0f;
         public float TargetWeight { get; set; } = 0.0f;
         public float Height { get; set; } = 0.0f;
         public UserActivityLevel ActivityLevel { get; set; } = UserActivityLevel.Sedentary;
