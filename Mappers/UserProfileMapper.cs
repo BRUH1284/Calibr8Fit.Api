@@ -31,7 +31,27 @@ namespace Calibr8Fit.Api.Mappers
                 Height = user.Profile!.Height,
                 ActivityLevel = user.Profile!.ActivityLevel,
                 Climate = user.Profile!.Climate,
+                ForcedConsumptionTarget = user.Profile!.ForcedConsumptionTarget,
+                ForcedHydrationTarget = user.Profile!.ForcedHydrationTarget,
+                ModifiedAt = user.Profile!.ModifiedAt,
                 ProfilePictureUrl = user.GetProfilePictureUrl(pathService)
+            };
+        }
+        public static UserProfileSettingsPatchDto ToUserProfileSettingsPatchDto(this User user)
+        {
+            return new UserProfileSettingsPatchDto
+            {
+                FirstName = user.Profile!.FirstName,
+                LastName = user.Profile!.LastName,
+                DateOfBirth = user.Profile!.DateOfBirth,
+                Gender = user.Profile!.Gender,
+                TargetWeight = user.Profile!.TargetWeight,
+                Height = user.Profile!.Height,
+                ActivityLevel = user.Profile!.ActivityLevel,
+                Climate = user.Profile!.Climate,
+                ForcedConsumptionTarget = user.Profile!.ForcedConsumptionTarget,
+                ForcedHydrationTarget = user.Profile!.ForcedHydrationTarget,
+                ModifiedAt = user.Profile!.ModifiedAt
             };
         }
         public static UserProfileDto ToUserProfileDto(
@@ -59,20 +79,29 @@ namespace Calibr8Fit.Api.Mappers
             };
         }
         //TODO: may break profile picture
-        public static UserProfile ToUserProfile(this UpdateUserProfileSettingsRequestDto dto, User user)
+        public static UserProfile ToUserProfile(
+            this UserProfileSettingsPatchDto patchDto,
+            User user)
         {
             return new UserProfile
             {
                 Id = user.Id,
-                FirstName = dto.FirstName ?? user.Profile!.FirstName,
-                LastName = dto.LastName ?? user.Profile!.LastName,
-                DateOfBirth = dto.DateOfBirth ?? user.Profile!.DateOfBirth,
-                Gender = dto.Gender ?? user.Profile!.Gender,
-                TargetWeight = dto.TargetWeight ?? user.Profile!.TargetWeight,
-                Height = dto.Height ?? user.Profile!.Height,
-                ActivityLevel = dto.ActivityLevel ?? user.Profile!.ActivityLevel,
-                Climate = dto.Climate ?? user.Profile!.Climate
+                FirstName = patchDto.FirstName ?? user.Profile!.FirstName,
+                LastName = patchDto.LastName ?? user.Profile!.LastName,
+                DateOfBirth = patchDto.DateOfBirth ?? user.Profile!.DateOfBirth,
+                Gender = patchDto.Gender ?? user.Profile!.Gender,
+                TargetWeight = patchDto.TargetWeight ?? user.Profile!.TargetWeight,
+                Height = patchDto.Height ?? user.Profile!.Height,
+                ActivityLevel = patchDto.ActivityLevel ?? user.Profile!.ActivityLevel,
+                Climate = patchDto.Climate ?? user.Profile!.Climate,
+
+                // Nullable fields can be set to null if explicitly provided, otherwise keep existing value
+                ForcedConsumptionTarget = patchDto.ForcedConsumptionTarget,
+                ForcedHydrationTarget = patchDto.ForcedHydrationTarget,
+
+                ModifiedAt = patchDto.ModifiedAt,
             };
         }
+
     }
 }

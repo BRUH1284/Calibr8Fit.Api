@@ -1,7 +1,10 @@
+using Calibr8Fit.Api.DataTransferObjects.User;
 using Calibr8Fit.Api.Interfaces.Repository.Base;
 using Calibr8Fit.Api.Interfaces.Service;
+using Calibr8Fit.Api.Mappers;
 using Calibr8Fit.Api.Models;
 using Calibr8Fit.Api.Services.Results;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace Calibr8Fit.Api.Services;
 
@@ -15,6 +18,20 @@ public class UserProfileService(
     private readonly IUserRepositoryBase<ProfilePicture, string[]> _profilePictureRepository = profilePictureRepository;
     private readonly IFileService _fileService = fileService;
     private readonly IPathService _pathService = pathService;
+
+    public async Task<UserProfileSettingsDto> SyncUserProfileSettingsAsync(User user, JsonPatchDocument<UserProfileSettingsPatchDto> patch)
+    {
+        // Apply the patch to a DTO
+        var dto = user.ToUserProfileSettingsPatchDto();
+        patch.ApplyTo(dto);
+
+        // If client data is newer, update the database
+        if (dto.ModifiedAt > user.Profile!.ModifiedAt)
+            await _userProfileRepository.UpdateAsync(dto.ToUserProfile(user));
+
+        // Return the latest profile settings
+        return user.ToUserProfileSettingsDto(_pathService);
+    }
 
     public async Task<Result> UploadProfilePictureAsync(User user, IFormFile file)
     {

@@ -8,6 +8,8 @@ using Calibr8Fit.Api.Interfaces.Service;
 using Calibr8Fit.Api.Mappers;
 using Calibr8Fit.Api.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Calibr8Fit.Api.Controllers
@@ -78,16 +80,19 @@ namespace Calibr8Fit.Api.Controllers
 
         [HttpPut("settings")]
         [Authorize]
-        public Task<IActionResult> UpdateMyProfileSettingsAsync([FromBody] UpdateUserProfileSettingsRequestDto requestDto) =>
+        public Task<IActionResult> SyncMyProfileSettingsAsync([FromBody] JsonPatchDocument<UserProfileSettingsPatchDto> patch) =>
             WithUser(async user =>
             {
                 if (user?.Profile is null) return Unauthorized("User profile not found.");
 
-                // Update user profile settings
-                await _userProfileRepository.UpdateAsync(requestDto.ToUserProfile(user));
+                // Check if the patch has the required 'modifiedAt'
+                if (!patch.Operations.Any(op =>
+                    op.path.Equals("/modifiedAt", StringComparison.OrdinalIgnoreCase) &&
+                    op.OperationType == OperationType.Replace))
+                    return BadRequest("Patch must include '/modifiedAt'.");
 
-                // Return updated profile settings
-                return Ok(user.ToUserProfileSettingsDto(_pathService));
+                // Sync profile settings and return the latest data
+                return Ok(await _userProfileService.SyncUserProfileSettingsAsync(user, patch));
             });
 
         // Profile Picture Management
