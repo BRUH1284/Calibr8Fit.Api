@@ -32,6 +32,7 @@ namespace Calibr8Fit.Api.Mappers
                 ActivityLevel = user.Profile!.ActivityLevel,
                 Climate = user.Profile!.Climate,
                 ForcedConsumptionTarget = user.Profile!.ForcedConsumptionTarget,
+                ForcedBurnTarget = user.Profile!.ForcedBurnTarget,
                 ForcedHydrationTarget = user.Profile!.ForcedHydrationTarget,
                 ModifiedAt = user.Profile!.ModifiedAt,
                 ProfilePictureUrl = user.GetProfilePictureUrl(pathService)
@@ -50,6 +51,7 @@ namespace Calibr8Fit.Api.Mappers
                 ActivityLevel = user.Profile!.ActivityLevel,
                 Climate = user.Profile!.Climate,
                 ForcedConsumptionTarget = user.Profile!.ForcedConsumptionTarget,
+                ForcedBurnTarget = user.Profile!.ForcedBurnTarget,
                 ForcedHydrationTarget = user.Profile!.ForcedHydrationTarget,
                 ModifiedAt = user.Profile!.ModifiedAt
             };
@@ -97,6 +99,7 @@ namespace Calibr8Fit.Api.Mappers
 
                 // Nullable fields can be set to null if explicitly provided, otherwise keep existing value
                 ForcedConsumptionTarget = patchDto.ForcedConsumptionTarget,
+                ForcedBurnTarget = patchDto.ForcedBurnTarget,
                 ForcedHydrationTarget = patchDto.ForcedHydrationTarget,
 
                 ModifiedAt = patchDto.ModifiedAt,

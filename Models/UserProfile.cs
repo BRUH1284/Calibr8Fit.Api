@@ -16,6 +16,7 @@ namespace Calibr8Fit.Api.Models
         public UserClimate Climate { get; set; } = UserClimate.Temperate;
         public string? ProfilePictureFileName { get; set; }
         public float? ForcedConsumptionTarget { get; set; }
+        public float? ForcedBurnTarget { get; set; }
         public float? ForcedHydrationTarget { get; set; }
         public virtual ICollection<ProfilePicture>? ProfilePictures { get; set; }
 

@@ -14,6 +14,7 @@ namespace Calibr8Fit.Api.DataTransferObjects.User
         public UserActivityLevel? ActivityLevel { get; set; }
         public UserClimate? Climate { get; set; }
         public float? ForcedConsumptionTarget { get; set; }
+        public float? ForcedBurnTarget { get; set; }
         public float? ForcedHydrationTarget { get; set; }
         [Required]
         public required DateTime ModifiedAt { get; set; }
